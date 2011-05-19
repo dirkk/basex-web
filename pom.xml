@@ -68,7 +68,7 @@
 				<artifactId>jetty-maven-plugin</artifactId>
 				<version>${jettyVersion}</version>
 			</plugin>
-			<plugin>
+<!-- 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.1</version>
@@ -83,7 +83,7 @@
 					<mainClass>org.basex.app.WebServer</mainClass>
 				</configuration>
 			</plugin>
-		</plugins>
+ -->		</plugins>
 	</build>
 
 
