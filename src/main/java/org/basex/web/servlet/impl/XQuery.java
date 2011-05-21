@@ -23,6 +23,8 @@ public class XQuery extends PrepareParamsServlet {
       final Map get, final Map post) throws IOException {
 
     response.setContentType("text/html");
+    //*TODO*
+    response.setCharacterEncoding("UTF-8");
 
     response.setStatus(HttpServletResponse.SC_OK);
     response.getWriter().write(BaseXClient.query(f, get, post));
