@@ -23,7 +23,7 @@ public class Html extends PrepareParamsServlet {
       final Map get, final Map post) throws IOException {
 
     response.setContentType("text/html");
-
+    response.setCharacterEncoding("UTF-8");
     response.setStatus(HttpServletResponse.SC_OK);
     response.getWriter().write(new InlineXQuery(f).eval(get, post));
   }
