@@ -1,9 +1,9 @@
+import module namespace api = "http://basex.org/lib/web-api";
 declare option output:omit-xml-declaration "no";
 declare option output:method "xhtml";
 declare option output:include-content-type "yes";
 declare option output:doctype-public "-//W3C//DTD XHTML 1.1//EN";
 declare option output:doctype-system "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd";
-
  
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>	
@@ -34,6 +34,13 @@ declare option output:doctype-system "http://www.w3.org/TR/xhtml11/DTD/xhtml11.d
   for $x in 1 to 10
   return <li>Lists {$x}</li>
 }</ul>
+<p>{
+  api:content-type("application/xhtml+xml;charset=UTF-8"),
+  api:set-cookie("hello", "world",xs:int(5),"/") ,
+  "My cookie says: ", api:get-cookie-value("hello") 
+  
+}
+</p>
 </article>
 <hr />
 <a href="/index.html">&lt; Please Click here to return to the previous page.</a>

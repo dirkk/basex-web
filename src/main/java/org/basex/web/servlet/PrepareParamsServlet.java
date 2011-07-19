@@ -43,10 +43,10 @@ public abstract class PrepareParamsServlet extends HttpServlet {
       final HttpServletResponse resp) throws IOException {
 
     final Map get = getMap(req);
-    final Map post = getPost(req);
+    final Map post = Map.EMPTY;
 
     try {
-      get(resp, requestedFile(req.getRequestURI()), get, post);
+      get(resp, req, requestedFile(req.getRequestURI()), get, post);
     } catch(final HttpException e) {
       resp.sendError(e.getStatus(), e.getReason());
     }
@@ -57,9 +57,24 @@ public abstract class PrepareParamsServlet extends HttpServlet {
    * @param req request
    * @return POST map
    */
-  @SuppressWarnings("unused")
   private Map getPost(final HttpServletRequest req) {
-    return Map.EMPTY;
+    @SuppressWarnings("unchecked")
+    java.util.Map<String, String[]> pars = req.getParameterMap();
+
+    Map post = Map.EMPTY;
+    for(final Entry<String, String[]> e : pars.entrySet()) {
+      final Str key = Str.get(e.getKey());
+      final String[] v = e.getValue();
+      final Item[] val = new Item[v.length];
+      for(int i = val.length; --i >= 0;) val[i] = new Atm(Token.token(v[i]));
+      try {
+        post = post.insert(key, Seq.get(val, val.length), null);
+      } catch(final QueryException e1) {
+        // TODO Auto-generated catch block
+        e1.printStackTrace();
+      }
+    }
+    return post;
   }
 
   /**
@@ -90,7 +105,15 @@ public abstract class PrepareParamsServlet extends HttpServlet {
   @Override
   public final void doPost(final HttpServletRequest req,
       final HttpServletResponse resp) throws IOException {
-  // TODO
+
+    final Map get = Map.EMPTY;
+    final Map post = getPost(req);
+
+    try {
+      get(resp, req, requestedFile(req.getRequestURI()), get, post);
+    } catch(final HttpException e) {
+      resp.sendError(e.getStatus(), e.getReason());
+    }
   }
 
   /**
@@ -98,12 +121,14 @@ public abstract class PrepareParamsServlet extends HttpServlet {
    * {@link PrepareParamsServlet} collecting the parameters before delegating
    * the actual get or post of the implementation.
    * @param resp response object
+   * @param req request object
    * @param f requested file
    * @param get GET map
    * @param post POST map
    * @throws IOException I/O exception
    */
-  public abstract void get(final HttpServletResponse resp, final File f,
+  public abstract void get(final HttpServletResponse resp,
+      final HttpServletRequest req, final File f,
       final Map get, final Map post) throws IOException;
 
   /**

@@ -6,8 +6,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.basex.query.item.map.Map;
-import org.basex.web.xquery.BaseXClient;
+import org.basex.web.xquery.BaseXContext;
 
 /**
  * Parses and substitutes inline XQuery with a query result.
@@ -37,15 +40,19 @@ public final class InlineXQuery {
    * intermediate.
    * @param get GET map
    * @param post POST map
+   * @param resp HTTP response object
+   * @param req HTTP request object
    * @return the result of the parse
    * @throws IOException on error.
    */
-  public String eval(final Map get, final Map post) throws IOException {
+  public String eval(final Map get, final Map post,
+      final HttpServletResponse resp, final HttpServletRequest req)
+      throws IOException {
     final BufferedReader fis = new BufferedReader(new InputStreamReader(
         new FileInputStream(file)));
     final StringBuilder sb = new StringBuilder(128);
     while(fis.ready()) {
-      consumeXQ(fis, sb, get, post);
+      consumeXQ(fis, sb, get, post, resp, req);
       sb.append((char) fis.read());
     }
     return sb.toString();
@@ -57,10 +64,14 @@ public final class InlineXQuery {
    * @param sb resultbuffer to fill.
    * @param get GET map
    * @param post POST map
+   * @param resp HTTP response
+   * @param req HTTP request
    * @throws IOException on error.
    */
   private void consumeXQ(final BufferedReader fis, final StringBuilder sb,
-      final Map get, final Map post) throws IOException {
+      final Map get, final Map post, final HttpServletResponse resp,
+      final HttpServletRequest req)
+      throws IOException {
     int apos = -1;
     fis.mark(START.length);
     final StringBuilder curQuery = new StringBuilder();
@@ -76,7 +87,7 @@ public final class InlineXQuery {
         curQuery.append((char) fis.read());
       }
 
-      sb.append(BaseXClient.exec(curQuery.toString(), get, post));
+      sb.append(BaseXContext.exec(curQuery.toString(), get, post, resp, req));
     } else {
       fis.reset();
     }

@@ -3,10 +3,11 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.basex</groupId>
 	<artifactId>basex-web</artifactId>
-	<version>0.6.6.3</version>
+	<version>0.6.7</version>
 	<name>BaseX Web Application Server</name>
 	<properties>
 		<jettyVersion>7.4.2.v20110526</jettyVersion>
+		<classname>org.basex.web.api.ServletApi</classname>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
@@ -15,7 +16,7 @@
 		<dependency>
 			<groupId>org.basex</groupId>
 			<artifactId>basex</artifactId>
-			<version>6.6.3-SNAPSHOT</version>
+			<version>6.7</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
