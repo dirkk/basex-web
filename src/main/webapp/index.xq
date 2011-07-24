@@ -1,4 +1,4 @@
-import module namespace api = "http://basex.org/lib/web-api";
+import module namespace web = "http://basex.org/lib/web";
 declare option output:omit-xml-declaration "no";
 declare option output:method "xhtml";
 declare option output:include-content-type "yes";
@@ -35,9 +35,8 @@ declare option output:doctype-system "http://www.w3.org/TR/xhtml11/DTD/xhtml11.d
   return <li>Lists {$x}</li>
 }</ul>
 <p>{
-  api:content-type("application/xhtml+xml;charset=UTF-8"),
-  api:set-cookie("hello", "world",xs:int(5),"/") ,
-  "My cookie says: ", api:get-cookie-value("hello") 
+  web:set-cookie("hello", "world",xs:int(5),"/") ,
+  "My cookie says: ", web:get-cookie("hello") 
   
 }
 </p>
