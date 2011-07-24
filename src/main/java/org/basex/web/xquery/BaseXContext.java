@@ -54,8 +54,9 @@ public final class BaseXContext {
    * @param rq request object
    * @return the query result.
    */
-  public static String exec(final String qu, final Map get, final Map post,
-      final HttpServletResponse rp, final HttpServletRequest rq) {
+  public static synchronized String
+      exec(final String qu, final Map get, final Map post,
+          final HttpServletResponse rp, final HttpServletRequest rq) {
     try {
       System.err.format("===\n%s\n=====", qu);
       QueryProcessor qp = new QueryProcessor(qu, CTX);
