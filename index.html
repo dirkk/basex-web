@@ -63,10 +63,14 @@ git clone git://github.com/micheee/xquery-webapp-skeleton.git
 cd xquery-webapp-skeleton
 mvn jetty:run
   </pre>
-  Then install the <a href="http://docs.basex.org/wiki/Packaging" title="Packaging - BaseX Documentation">basex-web package</a> into BaseX via: 
+  To install the <a href="http://docs.basex.org/wiki/Packaging" title="Packaging - BaseX Documentation">basex-web package</a> into BaseX via: 
   <pre>
 REPO INSTALL https://github.com/micheee/basex-web/raw/master/src/main/webapp/resource/basex-web-xq-1.0.1-distribution.zip
 </pre>
+<p>This package contains an XQuery API to set Headers, Cookies and the like. </p>
+<p>The skeleton app and the basex-web package both contain a demo guestbook application alongside a sample database, to install this database run:
+  <pre>create db guestbook http://localhost:8080/guestbook/guestbook.xml</pre>
+  from inside BaseX.
 <h2>License</h2>
 <p>BSD License
 </p>
