@@ -37,6 +37,13 @@
 			<version>1.2</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.tuckey</groupId>
+			<artifactId>urlrewritefilter</artifactId>
+			<version>3.1.0</version>
+			<type>jar</type>
+			<scope>runtime</scope>
+		</dependency>
 	</dependencies>
 	<repositories>
 		<repository>
@@ -80,9 +87,6 @@
 						</goals>
 					</execution>
 				</executions>
-				<configuration>
-					<mainClass>org.basex.app.WebServer</mainClass>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

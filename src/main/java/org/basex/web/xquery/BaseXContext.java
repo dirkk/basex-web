@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.basex.core.Context;
+import org.basex.core.Prop;
 import org.basex.io.IOFile;
 import org.basex.io.TextInput;
 import org.basex.query.QueryException;
@@ -23,7 +24,7 @@ public final class BaseXContext {
   private BaseXContext() { /* void */}
 
   /** Query Context. */
-  private static final Context CTX = new Context();
+  private static Context ctx = new Context();
   /** Current respone Object. */
   private static HttpServletResponse resp;
   /** Current request Object. */
@@ -58,13 +59,18 @@ public final class BaseXContext {
       exec(final String qu, final Map get, final Map post,
           final HttpServletResponse rp, final HttpServletRequest rq) {
     try {
-      System.err.format("===\n%s\n=====", qu);
-      QueryProcessor qp = new QueryProcessor(qu, CTX);
+      ctx.close();
+     // System.err.format("===\n%s\n=====", qu);
+      QueryProcessor qp = new QueryProcessor(qu, ctx);
+      ctx.prop.set(Prop.QUERYINFO, true);
+
       qp.bind("GET", get);
       setResp(rp);
       setReq(rq);
       qp.bind("POST", post);
-      return qp.execute().toString();
+      final String res = qp.execute().toString();
+     // System.err.println(qp.info());
+      return res;
     } catch(QueryException e) {
       return "<div class=\"error\">" + e.getMessage() + "</div>";
     }
