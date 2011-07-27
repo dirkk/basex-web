@@ -2,12 +2,6 @@ BaseX Web
 =========
 This is a sneak-peak at an XQuery-driven Web Application Server.
 
-Please Note
-----------
-If you are not interested in actively developing the backend have a look at the [Web Application Skeleton](https://github.com/micheee/xquery-webapp-skeleton) and
-[Draisienne - a poor mans helper library for web applications](https://github.com/micheee/draisienne). The latter is really very crude at the moment, feel free to add functionality.
-
-
 Requirements
 ------------
 [Java 1.6](http://java.com/getjava/index.jsp "Download Free Java Software") and [Maven](http://maven.apache.org/ "Maven - 

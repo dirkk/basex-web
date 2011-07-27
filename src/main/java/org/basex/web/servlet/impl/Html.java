@@ -2,6 +2,8 @@ package org.basex.web.servlet.impl;
 
 import java.io.File;
 import java.io.IOException;
+
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.basex.query.item.map.Map;
 import org.basex.web.parser.InlineXQuery;
@@ -19,13 +21,15 @@ public class Html extends PrepareParamsServlet {
   private static final long serialVersionUID = -7694236920689548933L;
 
   @Override
-  public final void get(final HttpServletResponse response, final File f,
-      final Map get, final Map post) throws IOException {
+  public final void
+      get(final HttpServletResponse response, final HttpServletRequest req,
+          final File f, final Map get, final Map post) throws IOException {
 
     response.setContentType("text/html");
+    // *TODO*
     response.setCharacterEncoding("UTF-8");
     response.setStatus(HttpServletResponse.SC_OK);
-    response.getWriter().write(new InlineXQuery(f).eval(get, post));
+    final String resp = new InlineXQuery(f).eval(get, post, response, req);
+    response.getWriter().write(resp);
   }
-
 }
