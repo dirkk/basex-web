@@ -2,6 +2,7 @@ package org.basex.web.xquery;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.basex.web.annotations.XQext;
 
@@ -13,6 +14,9 @@ import org.basex.web.annotations.XQext;
  */
 public final class XQueryExternal {
 
+  /** Name of the Session flash Cookie. */
+  private static final String INFOCOOKIE = "__info__";
+
   /**
    * Sets the content type.
    * @param ct content type
@@ -21,6 +25,59 @@ public final class XQueryExternal {
       paramhelp = { "the content type"}, help = "")
   public static void contentType(final String ct) {
     BaseXContext.getResp().setContentType(ct);
+  }
+
+  /**
+   * Disables caching for the current response.
+   */
+  @XQext(name = "no-cache", params = { }, paramhelp = { },
+      help = "Disable caching for this page")
+  public static void disableCache() {
+    final HttpServletResponse resp = BaseXContext.getResp();
+    if(resp.containsHeader("Cache-Control")) {
+      resp.addHeader("Cache-Control", "no-cache");
+      return;
+    }
+    resp.setHeader("Cache-Control", "no-cache");
+
+  }
+
+  /**
+   * Redirects to a given {@code location}.
+   * Additionally sets a cookie containing an informational {@code message}
+   * @param location location to redirect to
+   * @param message the message
+   */
+  @XQext(name = "redirect", params = { "location", "message"}, paramhelp = {
+      "URI to redirect to", "system flash message"},
+      help = "redirects the user to a given location, "
+          + "saves a message that is retrievable via web:flash()")
+  public static void redirect(final String location, final String message) {
+    final HttpServletResponse resp = BaseXContext.getResp();
+    resp.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+    System.out.println("Redirect# " + location);
+    resp.addCookie(new Cookie(XQueryExternal.INFOCOOKIE, message));
+    resp.setHeader("Location", location);
+  }
+  /**
+   * Retrieves the message saved in the cookie {@code __info}.
+   * This message is set via {@link #redirect(String, String)}
+   * @return Value of the cookie, iff it is set
+   */
+  @XQext(name = "flash", params = { }, paramhelp = { },
+      help = "Retrieves the message saved in the current session flash cookie "
+          + "and deletes the cookie.")
+  public static String flash() {
+    final Cookie[] cc = BaseXContext.getReq().getCookies();
+    if(null == cc) return "";
+    for(Cookie c : cc) {
+      if(!XQueryExternal.INFOCOOKIE.equals(c.getName())) continue;
+      final String ret = c.getValue();
+      c.setMaxAge(0); // delete the cookie;
+      BaseXContext.getResp().addCookie(c);
+      return ret;
+    }
+    return "";
   }
   /**
    * Sets a cookie with the specified parameters.
