@@ -55,12 +55,13 @@
 <p>Simply clone the project and run <code>mvn jetty:run</code></p>
 <p>If you are interested in running only a web application, you might also try the following:
   <pre>
-    git clone git://github.com/micheee/basex-web
-    cd basex-web
-    mvn install
-    cd ..
-    git clone git://github.com/micheee/xquery-webapp-skeleton.git
-    mvn jetty:run
+git clone git://github.com/micheee/basex-web
+cd basex-web
+mvn install
+cd ..
+git clone git://github.com/micheee/xquery-webapp-skeleton.git
+cd xquery-webapp-skeleton
+mvn jetty:run
   </pre>
   Then install the <a href="http://docs.basex.org/wiki/Packaging" title="Packaging - BaseX Documentation">basex-web package</a> into BaseX via: 
   <pre>
