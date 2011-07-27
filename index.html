@@ -52,14 +52,31 @@
     <p>Welcome to the the home of basex-web</p><h2>Dependencies</h2>
 <p>BaseX</p>
 <h2>Install</h2>
-<p>Simply clone the project and run ``mvn jetty:run``</p>
+<p>Simply clone the project and run <code>mvn jetty:run</code></p>
+<p>If you are interested in running only a web application, you might also try the following:
+  <pre>
+    git clone git://github.com/micheee/basex-web
+    cd basex-web
+    mvn install
+    cd ..
+    git clone git://github.com/micheee/xquery-webapp-skeleton.git
+    mvn jetty:run
+  </pre>
+  Then install the <a href="http://docs.basex.org/wiki/Packaging" title="Packaging - BaseX Documentation">basex-web package</a> into BaseX via: 
+  <pre>
+REPO INSTALL https://github.com/micheee/basex-web/raw/master/src/main/webapp/resource/basex-web-xq-1.0.1-distribution.zip
+</pre>
 <h2>License</h2>
 <p>BSD License
 </p>
 <h2>Authors</h2>
-<p>Leo Woerteler (leo@woerteler.de)<br/>Michael (mseiferle@gmail.com)<br/><br/>      </p>
+<p>Leo Woerteler (leo@woerteler.de)
+<br/>Michael (mseiferle@gmail.com)
+<br/>
+<br/>      </p>
 <h2>Contact</h2>
-<p>Michael (mseiferle@gmail.com)<br/>      </p>
+<p>Michael (mseiferle@gmail.com)
+<br/>      </p>
 
 
     <h2>Download</h2>
