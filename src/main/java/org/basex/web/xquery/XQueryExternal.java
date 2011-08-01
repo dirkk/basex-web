@@ -54,10 +54,9 @@ public final class XQueryExternal {
           + "saves a message that is retrievable via web:flash()")
   public static void redirect(final String location, final String message) {
     final HttpServletResponse resp = BaseXContext.getResp();
+    resp.setHeader("Location", String.format("%s", location));
     resp.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
-    System.out.println("Redirect# " + location);
     resp.addCookie(new Cookie(XQueryExternal.INFOCOOKIE, message));
-    resp.setHeader("Location", location);
   }
   /**
    * Retrieves the message saved in the cookie {@code __info}.
@@ -73,7 +72,7 @@ public final class XQueryExternal {
     for(Cookie c : cc) {
       if(!XQueryExternal.INFOCOOKIE.equals(c.getName())) continue;
       final String ret = c.getValue();
-      c.setMaxAge(0); // delete the cookie;
+      c.setMaxAge(1); // delete the cookie;
       BaseXContext.getResp().addCookie(c);
       return ret;
     }

@@ -26,7 +26,7 @@ public abstract class PrepareParamsServlet extends HttpServlet {
   /** Version. */
   private static final long serialVersionUID = 8548004356377035911L;
   /** the web root: *TODO* this path might be configurable in future version. */
-  private final String fPath;
+  protected final String fPath;
 
   /** Constructor. */
   public PrepareParamsServlet() {
@@ -137,7 +137,7 @@ public abstract class PrepareParamsServlet extends HttpServlet {
    * @return File object
    * @throws HttpException HTTP exception
    */
-  private File requestedFile(final String file) throws HttpException {
+  protected File requestedFile(final String file) throws HttpException {
     final File f = new File(fPath, file);
     if(!f.exists()) throw new HttpException(HttpServletResponse.SC_NOT_FOUND,
         "The file '" + file + "' doesn't exist on the server.");

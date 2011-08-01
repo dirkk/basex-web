@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.basex.core.Context;
 import org.basex.core.Prop;
 import org.basex.io.IOFile;
-import org.basex.io.TextInput;
+import org.basex.io.in.TextInput;
 import org.basex.query.QueryException;
 import org.basex.query.QueryProcessor;
 import org.basex.query.item.map.Map;
@@ -55,7 +55,7 @@ public final class BaseXContext {
    * @param rq request object
    * @return the query result.
    */
-  public static synchronized String
+  public static String
       exec(final String qu, final Map get, final Map post,
           final HttpServletResponse rp, final HttpServletRequest rq) {
     try {
