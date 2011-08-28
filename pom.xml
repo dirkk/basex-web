@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.basex</groupId>
 	<artifactId>basex-web</artifactId>
-	<version>0.6.71</version>
+	<version>0.6.72</version>
 	<name>BaseX Web Application Server</name>
 	<properties>
 		<jettyVersion>7.4.2.v20110526</jettyVersion>
@@ -16,9 +16,15 @@
 		<dependency>
 			<groupId>org.basex</groupId>
 			<artifactId>basex</artifactId>
-			<version>6.7.1</version>
+			<version>6.7.2-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>spy</groupId>
+			<artifactId>spymemcached</artifactId>
+			<version>2.6</version>
+		</dependency>
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -49,13 +55,26 @@
 			<artifactId>guava</artifactId>
 			<version>r09</version>
 			<type>jar</type>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>r09</version>
 			<type>javadoc</type>
+			<classifier>javadoc</classifier>
+		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.5</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.5</version>
+			<type>jar</type>
 			<classifier>javadoc</classifier>
 			<scope>compile</scope>
 		</dependency>
@@ -71,6 +90,16 @@
 			<name>BaseX Maven Repository</name>
 			<url>http://files.basex.org/maven</url>
 		</repository>
+		<repository>
+			<id>spy</id>
+			<name>Spy Repository</name>
+			<layout>default</layout>
+			<url>http://files.couchbase.com/maven2/</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+
 	</repositories>
 
 	<build>

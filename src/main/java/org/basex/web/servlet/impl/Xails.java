@@ -27,15 +27,17 @@ public class Xails extends PrepareParamsServlet {
   private File controller;
 
   /** Current Page Buffer. **/
-  private StringBuilder pageBuffer;
+//  private StringBuilder pageBuffer;
 
   @Override
   public void get(final HttpServletResponse response,
       final HttpServletRequest req,
       final File f, final Map get, final Map post) throws IOException {
     // TODO Auto-generated method stub
+    final StringBuilder pageBuffer = new StringBuilder(256);
+
     init(req);
-    fillPageBuffer();
+    fillPageBuffer(pageBuffer);
     final String queryResult = buildResult(response, req, get, post);
     response.setContentType("text/html");
     response.setCharacterEncoding("UTF-8");
@@ -89,15 +91,6 @@ public class Xails extends PrepareParamsServlet {
     return (i != -1 ? n.substring(0, i) : n).replaceAll("[^\\w-]", "");
   }
 
-  /**
-   * Reads the layout into the page Buffer.
-   * @throws IOException ex
-   */
-  private void fillPageBuffer() throws IOException {
-    pageBuffer.append(
-        TextInput.content(new IOFile(fPath +
-            "/layouts/default.html")).toString());
-  }
 
   /**
    * Sets the controller and action based on the sent request.
@@ -106,7 +99,6 @@ public class Xails extends PrepareParamsServlet {
    * @throws HttpException on error
    */
   private void init(final HttpServletRequest req) throws HttpException {
-    pageBuffer = new StringBuilder(128);
     final String cntr = Objects.firstNonNull(
         req.getAttribute("xails.controller"), "page").toString();
     assert cntr != null : "Error no controller set";
@@ -127,4 +119,14 @@ public class Xails extends PrepareParamsServlet {
     view = super.requestedFile(vpath);
   }
 
+  /**
+   * Reads the layout into the page Buffer.
+   * @param pb StrinBuilder object containing the page's content.
+   * @throws IOException ex
+   */
+  private void fillPageBuffer(final StringBuilder pb) throws IOException {
+    pb.append(
+        TextInput.content(new IOFile(fPath +
+            "/layouts/default.html")).toString());
+  }
 }

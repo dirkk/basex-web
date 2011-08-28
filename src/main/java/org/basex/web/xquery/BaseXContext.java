@@ -6,13 +6,14 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.basex.core.Context;
-import org.basex.core.Prop;
 import org.basex.io.IOFile;
 import org.basex.io.in.TextInput;
 import org.basex.query.QueryException;
 import org.basex.query.QueryProcessor;
 import org.basex.query.item.map.Map;
+import org.basex.web.xquery.util.MyCache;
 
 /**
  * Provides static methods to access BaseX.
@@ -25,6 +26,10 @@ public final class BaseXContext {
 
   /** Query Context. */
   private static Context ctx = new Context();
+  /** Memcached Client. */
+  private static final boolean USE_MEMCACHED = false;
+//  private static LocalSession sess =
+//      new LocalSession(ctx);
   /** Current respone Object. */
   private static HttpServletResponse resp;
   /** Current request Object. */
@@ -60,19 +65,39 @@ public final class BaseXContext {
           final HttpServletResponse rp, final HttpServletRequest rq) {
     try {
       ctx.close();
-     // System.err.format("===\n%s\n=====", qu);
       QueryProcessor qp = new QueryProcessor(qu, ctx);
-      ctx.prop.set(Prop.QUERYINFO, true);
-
-      qp.bind("GET", get);
       setResp(rp);
       setReq(rq);
+
+     // Query q = sess.query(qu);
+//      final String p = String.format("$POST := %s", post.toString());
+//      System.out.println(p);
+//      final String g = String.format("$GET := %s", get.toString());
+//      System.out.println(g);
+      qp.bind("GET", get);
       qp.bind("POST", post);
+      final String hash = DigestUtils.sha512Hex(String.format("%s%s%s", qu, get,
+          post));
+
+      if(USE_MEMCACHED) {
+        final String cached = (String) MyCache.getInstance().get(hash);
+        if(cached != null) return cached;
+      }
       final String res = qp.execute().toString();
-     // System.err.println(qp.info());
+      // System.err.println(qp.info());
+      if(USE_MEMCACHED) {
+        if(qp.updates() == 0) {
+          MyCache.getInstance().set(hash, 360, res);
+        } else {
+          MyCache.getInstance().flushAll();
+        }
+      }
+
       return res;
     } catch(QueryException e) {
       return "<div class=\"error\">" + e.getMessage() + "</div>";
+//    } catch(BaseXException e) {
+//      return "<div class=\"error\">" + e.getMessage() + "</div>";
     }
   }
 
