@@ -28,6 +28,7 @@ public class XQuery extends PrepareParamsServlet {
     response.setContentType("text/html");
     response.setCharacterEncoding("UTF-8");
     response.setStatus(HttpServletResponse.SC_OK);
-    response.getWriter().write(BaseXContext.query(f, get, post, response, req));
+    response.getWriter().write(BaseXContext.query(f, get, post, response, req).
+        getBody());
   }
 }

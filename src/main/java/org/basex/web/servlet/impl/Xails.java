@@ -9,6 +9,7 @@ import org.basex.io.IOFile;
 import org.basex.io.in.TextInput;
 import org.basex.query.item.map.Map;
 import org.basex.web.servlet.PrepareParamsServlet;
+import org.basex.web.servlet.util.ResultPage;
 import org.basex.web.xquery.BaseXContext;
 import org.eclipse.jetty.http.HttpException;
 
@@ -60,9 +61,9 @@ public class Xails extends PrepareParamsServlet {
           throws IOException {
     final StringBuilder qry = prepareQuery();
     qry.append(TextInput.content(new IOFile(view)).toString());
-    final String queryResult = BaseXContext.exec(qry.toString(), get, post,
+    final ResultPage queryResult = BaseXContext.exec(qry.toString(), get, post,
         resp, req);
-    return queryResult;
+    return queryResult.getBody();
   }
   /**
    * Adds the controller import to the view file.

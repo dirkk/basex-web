@@ -1,6 +1,5 @@
 package org.basex.web.xquery;
 
-import java.util.UUID;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -29,15 +28,6 @@ public final class XQueryExternal {
     BaseXContext.getResp().setContentType(ct);
   }
 
-  /**
-   * Returns an UUID.
-   * @return uuid
-   */
-  @XQext(name = "uuid", params = { }, paramhelp = "{}", help = "Returns a UUID")
-  public static
-      String uuid() {
-    return UUID.randomUUID().toString();
-  }
 
   /**
    * Disables caching for the current response.
