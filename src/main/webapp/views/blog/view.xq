@@ -5,6 +5,7 @@ let $comments := $entry/comments
 return
 <div class="post detail">
 <h1>{$entry/title/text()}</h1>
+
     <div class="post">
         <h3>{$entry/title/text()} <small>{" ", data($entry/@date)}</small></h3>
         <p>{$entry/body/text()}

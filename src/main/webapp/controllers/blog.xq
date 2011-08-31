@@ -7,7 +7,7 @@ declare function blog:entries(){
     return $entry  
 };
 declare function blog:find($uuid as xs:string){
-    doc('blog')//entry[./@uuid eq $uuid]
+    doc('blog')/entries/entry[./@uuid eq $uuid]
 };
 
 declare function blog:comment-box($uuid){
@@ -21,7 +21,7 @@ declare function blog:comment-box($uuid){
 };
 declare updating function blog:comment($name, $message, $uuid){
     insert node 
-        <comment date="2008-10-10" uuid="123asd123">
+        <comment date="{fn:current-date()}" uuid="{web:uuid()}">
             <from>{$name}</from> 
             <body>{$message}</body>
         </comment> 
@@ -30,5 +30,6 @@ declare updating function blog:comment($name, $message, $uuid){
 };
 declare updating function blog:err(){
     let     $i :=  web:redirect("/app/blog/","Your comment has not been saved") 
-    return   (insert node <r i="{$i}" /> as last into <a />, insert node <void a="{$i}"/> as last into <r />)
+    return   (insert node <r i="{$i}" /> as last into <a />, 
+              insert node <void a="{$i}"/> as last into <r />)
 };

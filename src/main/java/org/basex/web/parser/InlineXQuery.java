@@ -10,7 +10,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.basex.query.item.map.Map;
-import org.basex.web.xquery.BaseXContextImpl;
+import org.basex.web.xquery.BaseXContext;
+
 
 /**
  * Parses and substitutes inline XQuery with a query result.
@@ -87,7 +88,7 @@ public final class InlineXQuery {
         curQuery.append((char) fis.read());
       }
 
-      sb.append(BaseXContextImpl.exec(curQuery.toString(), get, post, resp, req));
+      sb.append(BaseXContext.exec(curQuery.toString(), get, post, resp, req));
     } else {
       fis.reset();
     }

@@ -6,7 +6,7 @@
 	<version>0.6.72</version>
 	<name>BaseX Web Application Server</name>
 	<properties>
-		<jettyVersion>7.4.2.v20110526</jettyVersion>
+		<jettyVersion>7.4.5.v20110725</jettyVersion>
 		<classname>org.basex.web.api.ServletApi</classname>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>

@@ -58,7 +58,13 @@ public final class XQueryExternal {
     final HttpServletResponse resp = BaseXContext.getResp();
     resp.setHeader("Location", String.format("%s", location));
     resp.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
-    resp.addCookie(new Cookie(XQueryExternal.INFOCOOKIE, message));
+//    final Cookie c = new Cookie(XQueryExternal.INFOCOOKIE, message);
+//    c.
+//    resp.addCookie(c);
+    System.out.println("Setting http only cookie");
+    resp.setHeader("SET-COOKIE", XQueryExternal.INFOCOOKIE + "=" + message
+        + "; HttpOnly");
+
   }
   /**
    * Retrieves the message saved in the cookie {@code __info}.
@@ -74,8 +80,10 @@ public final class XQueryExternal {
     for(Cookie c : cc) {
       if(!XQueryExternal.INFOCOOKIE.equals(c.getName())) continue;
       final String ret = c.getValue();
-      c.setMaxAge(1); // delete the cookie;
-      BaseXContext.getResp().addCookie(c);
+      c.setVersion(0);
+      c.setMaxAge(0); // delete the cookie;
+      c.setValue(" ");
+      BaseXContext.getResp().addCookie(c);      
       return ret;
     }
     return "";
