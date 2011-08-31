@@ -63,6 +63,7 @@ public final class XQueryExternal {
 //    resp.addCookie(c);
     System.out.println("Setting http only cookie");
     resp.setHeader("SET-COOKIE", XQueryExternal.INFOCOOKIE + "=" + message
+        + ";path=/ "
         + "; HttpOnly");
 
   }
@@ -80,10 +81,17 @@ public final class XQueryExternal {
     for(Cookie c : cc) {
       if(!XQueryExternal.INFOCOOKIE.equals(c.getName())) continue;
       final String ret = c.getValue();
-      c.setVersion(0);
-      c.setMaxAge(0); // delete the cookie;
-      c.setValue(" ");
-      BaseXContext.getResp().addCookie(c);      
+//      c.setVersion(0);
+//      c.setMaxAge(0); // delete the cookie;
+//      c.setValue(" ");
+//      BaseXContext.getResp().addCookie(c);      
+      BaseXContext.getResp().setHeader("SET-COOKIE",
+          XQueryExternal.INFOCOOKIE + "=" + "deleted"
+              + ";path=/ "
+              + ";expires=Thu, 01-Jan-1970 00:00:01 GMT "
+              + "; HttpOnly"
+//              + "; max-age=0"
+              );
       return ret;
     }
     return "";
