@@ -2,6 +2,8 @@ package org.basex.web.servlet.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Enumeration;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -38,9 +40,14 @@ public class Xails extends PrepareParamsServlet {
     final StringBuilder pageBuffer = new StringBuilder(256);
 
     init(req);
-    fillPageBuffer(pageBuffer);
+
+    final String file = req.getHeader("X-Requested-With") != null ?
+        "/layouts/ajax.html" : "/layouts/default.html";
+    fillPageBuffer(pageBuffer, file);
+
     final String queryResult = buildResult(response, req, get, post);
-    response.setContentType("text/html");
+    
+    response.setContentType("application/xml");
     response.setCharacterEncoding("UTF-8");
     if(!response.containsHeader("Location"))
     response.setStatus(HttpServletResponse.SC_OK);
@@ -123,11 +130,13 @@ public class Xails extends PrepareParamsServlet {
   /**
    * Reads the layout into the page Buffer.
    * @param pb StrinBuilder object containing the page's content.
+   * @param file layout to fill
    * @throws IOException ex
    */
-  private void fillPageBuffer(final StringBuilder pb) throws IOException {
+  private void fillPageBuffer(final StringBuilder pb, 
+      final String file) throws IOException {
     pb.append(
         TextInput.content(new IOFile(fPath +
-            "/layouts/default.html")).toString());
+            file)).toString());
   }
 }
