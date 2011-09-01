@@ -3,8 +3,12 @@ import module namespace web="http://basex.org/lib/web";
 let $entry := blog:find($GET('entry'))
 let $comments := $entry/comments
 return
+
 <div class="post detail">
+{web:flash()}
+
 <h1>{$entry/title/text()}</h1>
+
 
     <div class="post">
         <h3>{$entry/title/text()} <small>{" ", data($entry/@date)}</small></h3>
