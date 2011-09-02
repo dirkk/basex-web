@@ -6,12 +6,14 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.basex.core.Command;
 import org.basex.core.Context;
 import org.basex.io.IOFile;
 import org.basex.io.in.TextInput;
 import org.basex.query.QueryException;
 import org.basex.query.QueryProcessor;
 import org.basex.query.item.map.Map;
+import org.basex.server.LocalSession;
 import org.basex.web.servlet.util.ResultPage;
 
 /**
@@ -64,7 +66,6 @@ public final class BaseXContext {
   public static ResultPage
       exec(final String qu, final Map get, final Map post,
           final HttpServletResponse rp, final HttpServletRequest rq) {
-
     ResultPage result = r.get();
     try {
       ctx.close();
@@ -80,7 +81,7 @@ public final class BaseXContext {
 //        final String cached = (String) MyCache.getInstance().get(hash);
 //        if(cached != null) return cached;
 //      }
-      final String res = qp.execute().toString();
+        final String res = exec(qp);
       result.setBody(res);
 //      if(USE_MEMCACHED) {
 //        if(qp.updates() == 0) {
@@ -89,11 +90,23 @@ public final class BaseXContext {
 //          MyCache.getInstance().flushAll();
 //        }
 //      }
+
       return result;
     } catch(QueryException e) {
       return new ResultPage("<div class=\"error\">" + e.getMessage() + "</div>",
           rp, rq);
     }
+  }
+
+  /**
+   * Executes the actual query synchronized.
+   * @param qp Query Processor.
+   * @return the result string.
+   * @throws QueryException escalated
+   */
+  private static synchronized String exec(final QueryProcessor qp) 
+      throws QueryException {
+    return qp.execute().toString();
   }
   /**
    * Returns the response.

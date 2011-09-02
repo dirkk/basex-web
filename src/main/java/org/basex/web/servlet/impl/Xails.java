@@ -2,7 +2,6 @@ package org.basex.web.servlet.impl;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Enumeration;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -50,7 +49,7 @@ public class Xails extends PrepareParamsServlet {
     response.setContentType("application/xml");
     response.setCharacterEncoding("UTF-8");
     if(!response.containsHeader("Location"))
-    response.setStatus(HttpServletResponse.SC_OK);
+      response.setStatus(HttpServletResponse.SC_OK);
     response.getWriter().write(pageBuffer.toString().replace("{{$content}}",
         queryResult));
   }
@@ -79,9 +78,9 @@ public class Xails extends PrepareParamsServlet {
    */
   private StringBuilder prepareQuery() throws IOException {
     final StringBuilder qry = new StringBuilder(128);
-    if(controller == null)
-      return qry;
+    if(controller == null) return qry;
     final String controllername = dbname(controller.getName());
+
     qry.append(String.format("import module namespace "
         + "%s=\"http://www.basex.org/myapp/%s\" " + "at \"%s\";\n",
         controllername,
@@ -110,9 +109,11 @@ public class Xails extends PrepareParamsServlet {
     final String cntr = Objects.firstNonNull(
         req.getAttribute("xails.controller"), "page").toString();
     assert cntr != null : "Error no controller set";
+
     final String ac = Objects.firstNonNull(req.getAttribute("xails.action"),
         "index").toString();
     assert view != null : "Error no action set";
+
     final String vpath = String.format("views/%s/%s.xq",
         cntr,
         ac
@@ -120,7 +121,7 @@ public class Xails extends PrepareParamsServlet {
     final String cpath = String.format("controllers/%s.xq",
         cntr
     );
-    //System.err.format("Controller:\t%s\n View:\t%s", cntr, vpath);
+
     try {
       controller = super.requestedFile(cpath);
     } catch(HttpException e) { }
