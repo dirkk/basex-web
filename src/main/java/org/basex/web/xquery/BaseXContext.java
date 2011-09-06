@@ -6,14 +6,14 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.basex.core.Command;
+import org.basex.core.BaseXException;
 import org.basex.core.Context;
 import org.basex.io.IOFile;
 import org.basex.io.in.TextInput;
-import org.basex.query.QueryException;
-import org.basex.query.QueryProcessor;
 import org.basex.query.item.map.Map;
 import org.basex.server.LocalSession;
+import org.basex.server.Query;
+import org.basex.server.Session;
 import org.basex.web.servlet.util.ResultPage;
 
 /**
@@ -29,13 +29,12 @@ public final class BaseXContext {
       return ResultPage.getEmpty();
     }
   };
-
+  
   /** Do not construct me. */
   private BaseXContext() { /* void */}
+  
 
-  /** Query Context. */
-  private static Context ctx = new Context();
-//  /** Memcached Client. */
+  //  /** Memcached Client. */
 //  private static final boolean USE_MEMCACHED = false;
 
   /**
@@ -54,7 +53,7 @@ public final class BaseXContext {
     return exec(TextInput.content(new IOFile(f)).toString(), get, post, re, rq);
   }
 
-  /**
+  /** 
    * Executes a query string.
    * @param qu query string
    * @param get GET map
@@ -66,14 +65,15 @@ public final class BaseXContext {
   public static ResultPage
       exec(final String qu, final Map get, final Map post,
           final HttpServletResponse rp, final HttpServletRequest rq) {
-    ResultPage result = r.get();
+    final ResultPage result = r.get();
+    final Session sess = new LocalSession(new Context());
     try {
-      ctx.close();
-      QueryProcessor qp = new QueryProcessor(qu, ctx);
+      final Query q = sess.query(qu);
       result.setReq(rq);
       result.setResp(rp);
-      qp.bind("GET", get);
-      qp.bind("POST", post);
+      q.bind("GET", get, null);
+      q.bind("POST", post, null);
+      
 //    final String hash = DigestUtils.sha512Hex(String.format("%s%s%s", qu, get,
 //          post));
 
@@ -81,8 +81,7 @@ public final class BaseXContext {
 //        final String cached = (String) MyCache.getInstance().get(hash);
 //        if(cached != null) return cached;
 //      }
-        final String res = exec(qp);
-      result.setBody(res);
+      result.setBody(q.execute());
 //      if(USE_MEMCACHED) {
 //        if(qp.updates() == 0) {
 //          MyCache.getInstance().set(hash, 360, res);
@@ -90,24 +89,22 @@ public final class BaseXContext {
 //          MyCache.getInstance().flushAll();
 //        }
 //      }
-
+//      ctx.get().close();
+      sess.close();
       return result;
-    } catch(QueryException e) {
+    } catch(BaseXException e) {
       return new ResultPage("<div class=\"error\">" + e.getMessage() + "</div>",
-          rp, rq);
+          rp, rq); 
+//    } catch(IOException e) {
+//      return new ResultPage("<div class=\"error\">" + e.getMessage() + "</div>",
+//          rp, rq); 
+    } catch(IOException e) {
+      return new ResultPage("<div class=\"error\">" + e.getMessage() + "</div>",
+          rp, rq); 
     }
   }
 
-  /**
-   * Executes the actual query synchronized.
-   * @param qp Query Processor.
-   * @return the result string.
-   * @throws QueryException escalated
-   */
-  private static synchronized String exec(final QueryProcessor qp) 
-      throws QueryException {
-    return qp.execute().toString();
-  }
+
   /**
    * Returns the response.
    * @return response
