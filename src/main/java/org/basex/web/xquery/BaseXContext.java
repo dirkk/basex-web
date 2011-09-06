@@ -23,7 +23,8 @@ import org.basex.web.servlet.util.ResultPage;
  */
 public final class BaseXContext {
   /** Thread local resultpage. */
-  private static ThreadLocal<ResultPage> r = new ThreadLocal<ResultPage>() {
+  private final static ThreadLocal<ResultPage> resultPage =
+      new ThreadLocal<ResultPage>() {
     @Override
     protected ResultPage initialValue() {
       return ResultPage.getEmpty();
@@ -33,10 +34,6 @@ public final class BaseXContext {
   /** Do not construct me. */
   private BaseXContext() { /* void */}
   
-
-  //  /** Memcached Client. */
-//  private static final boolean USE_MEMCACHED = false;
-
   /**
    * This Method reads and returns the result of a whole query.
    * @param f the filename
@@ -62,46 +59,38 @@ public final class BaseXContext {
    * @param rq request object
    * @return the query result.
    */
-  public static ResultPage
-      exec(final String qu, final Map get, final Map post,
-          final HttpServletResponse rp, final HttpServletRequest rq) {
-    final ResultPage result = r.get();
+  public static ResultPage exec(final String qu, final Map get, final Map post,
+      final HttpServletResponse rp, final HttpServletRequest rq) {
     final Session sess = new LocalSession(new Context());
     try {
       final Query q = sess.query(qu);
-      result.setReq(rq);
-      result.setResp(rp);
+      resultPage.get().setReq(rq);
+      resultPage.get().setResp(rp);
+
       q.bind("GET", get, null);
       q.bind("POST", post, null);
-      
-//    final String hash = DigestUtils.sha512Hex(String.format("%s%s%s", qu, get,
-//          post));
 
-//      if(USE_MEMCACHED) {
-//        final String cached = (String) MyCache.getInstance().get(hash);
-//        if(cached != null) return cached;
-//      }
-      result.setBody(q.execute());
-//      if(USE_MEMCACHED) {
-//        if(qp.updates() == 0) {
-//          MyCache.getInstance().set(hash, 360, res);
-//        } else {
-//          MyCache.getInstance().flushAll();
-//        }
-//      }
-//      ctx.get().close();
+      resultPage.get().setBody(q.execute());
       sess.close();
-      return result;
+      return resultPage.get();
     } catch(BaseXException e) {
-      return new ResultPage("<div class=\"error\">" + e.getMessage() + "</div>",
-          rp, rq); 
-//    } catch(IOException e) {
-//      return new ResultPage("<div class=\"error\">" + e.getMessage() + "</div>",
-//          rp, rq); 
+        return err(rp, rq, e);
     } catch(IOException e) {
-      return new ResultPage("<div class=\"error\">" + e.getMessage() + "</div>",
-          rp, rq); 
+        return err(rp, rq, e);
     }
+  }
+
+  /**
+   * Returns a ResultPage containing an Error Message
+   * @param rp response
+   * @param rq request
+   * @param e error
+   * @return ResultPage with error message
+   */
+  private static ResultPage err(final HttpServletResponse rp,
+      final HttpServletRequest rq, Exception e) {
+    return new ResultPage("<div class=\"error\">" + e.getMessage() + "</div>",
+        rp, rq);
   }
 
 
@@ -110,7 +99,7 @@ public final class BaseXContext {
    * @return response
    */
   static HttpServletResponse getResp() {
-    return r.get().getResp();
+    return resultPage.get().getResp();
   }
 
   /**
@@ -118,7 +107,7 @@ public final class BaseXContext {
    * @return request
    */
   static HttpServletRequest getReq() {
-    return r.get().getReq();
+    return resultPage.get().getReq();
   }
 
 }
