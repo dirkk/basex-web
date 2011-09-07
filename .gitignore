@@ -15,3 +15,7 @@
 # /.settings/
 /.settings/org.maven.ide.eclipse.prefs
 .classpath
+
+/.settings/org.eclipse.m2e.core.prefs
+/.settings/org.eclipse.core.resources.prefs
+/.project
