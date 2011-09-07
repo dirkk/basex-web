@@ -13,7 +13,6 @@ import org.basex.io.in.TextInput;
 import org.basex.query.item.map.Map;
 import org.basex.server.LocalSession;
 import org.basex.server.Query;
-import org.basex.server.Session;
 import org.basex.web.servlet.util.ResultPage;
 
 /**
@@ -31,6 +30,14 @@ public final class BaseXContext {
     }
   };
   
+  
+  
+  /** Context. */
+//  private static final Context ctx = new Context();
+  /** Session. */
+  final static LocalSession session = new LocalSession(new Context());
+    
+
   /** Do not construct me. */
   private BaseXContext() { /* void */}
   
@@ -59,25 +66,45 @@ public final class BaseXContext {
    * @param rq request object
    * @return the query result.
    */
-  public static ResultPage exec(final String qu, final Map get, final Map post,
+  public static synchronized ResultPage exec(final String qu, final Map get, final Map post,
       final HttpServletResponse rp, final HttpServletRequest rq) {
-    final Session sess = new LocalSession(new Context());
+    
+    setReqResp(rp, rq);
     try {
-      final Query q = sess.query(qu);
-      resultPage.get().setReq(rq);
-      resultPage.get().setResp(rp);
-
-      q.bind("GET", get, null);
-      q.bind("POST", post, null);
-
+      final Query q = session.query(qu);
+      
+      bind(get, post, q);
+      
       resultPage.get().setBody(q.execute());
-      sess.close();
+      assert null != resultPage.get().getBody() : "Query Result must not be ''"; 
       return resultPage.get();
     } catch(BaseXException e) {
         return err(rp, rq, e);
-    } catch(IOException e) {
-        return err(rp, rq, e);
     }
+  }
+
+  /**
+   * Set Request/Response.
+   * @param rp response
+   * @param rq request
+   */
+  private static void setReqResp(final HttpServletResponse rp,
+      final HttpServletRequest rq) {
+    resultPage.get().setReq(rq);
+    resultPage.get().setResp(rp);
+  }
+
+  /**
+   * Bind.
+   * @param get get
+   * @param post post
+   * @param q q
+   * @throws BaseXException ex.
+   */
+  private static void bind(final Map get, final Map post, final Query q)
+      throws BaseXException {
+    q.bind("GET", get, null);
+    q.bind("POST", post, null);
   }
 
   /**

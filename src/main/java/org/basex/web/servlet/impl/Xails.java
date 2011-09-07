@@ -45,7 +45,7 @@ public class Xails extends PrepareParamsServlet {
     fillPageBuffer(pageBuffer, file);
 
     final String queryResult = buildResult(response, req, get, post);
-    
+    assert null != queryResult;
     response.setContentType("application/xml");
     response.setCharacterEncoding("UTF-8");
     if(!response.containsHeader("Location"))
@@ -108,11 +108,11 @@ public class Xails extends PrepareParamsServlet {
   private void init(final HttpServletRequest req) throws HttpException {
     final String cntr = Objects.firstNonNull(
         req.getAttribute("xails.controller"), "page").toString();
-    assert cntr != null : "Error no controller set";
+    assert null != cntr : "Error no controller set";
 
     final String ac = Objects.firstNonNull(req.getAttribute("xails.action"),
         "index").toString();
-    assert view != null : "Error no action set";
+    assert null != ac : "Error no action set";
 
     final String vpath = String.format("views/%s/%s.xq",
         cntr,
