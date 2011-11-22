@@ -45,7 +45,8 @@ public class Xails extends PrepareParamsServlet {
 
     final String queryResult = buildResult(response, req, get, post);
     assert null != queryResult;
-    response.setContentType("application/xml");
+//    response.setContentType("application/xml");
+    response.setContentType("text/html");
     response.setCharacterEncoding("UTF-8");
     if(!response.containsHeader("Location"))
       response.setStatus(HttpServletResponse.SC_OK);
