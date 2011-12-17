@@ -15,22 +15,22 @@ import module namespace web="http://basex.org/lib/web";
       <dt>Controllers</dt>
       <dd>…</dd>
     </dl>
-    
-    
-    
+
+
+
     <h2>Mini Example</h2>
     <p>The following list is generated dynamically by <a href="http://basex.org" target="_blank">BaseX</a>:</p>
     <ul>
-    {for $x in 1 to 10 
+    {for $x in 1 to 10
      return <li>{$x}</li>
     }</ul>
    <p> Source for the above list:
     <listing>&lt;ul&gt;
     {{
-      for $x in 1 to 10 
+      for $x in 1 to 10
       return &lt;li&gt;{{$x}}&lt;/li&gt;
 }}&lt;/ul&gt;
     </listing>
-    
+
     </p>
  </div>

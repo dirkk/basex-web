@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.basex.web.session;
 
@@ -10,7 +10,7 @@ import org.basex.server.Session;
 /**
  * @author Michael Seiferle, <ms@basex.org>
  * @author BaseX Team
- * 
+ *
  */
 public class SessionFactory {
 
@@ -24,7 +24,7 @@ public class SessionFactory {
 //      // TODO Auto-generated catch block
 //      throw Util.notexpected(e);
 //    }
-//        
+//
 //  }
   /** My Session. */
   private static final Session INSTANCE;
