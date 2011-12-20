@@ -50,13 +50,13 @@ dojo.declare("basex.Form", null, {
             onClick: function() {
                 // Do something:
                 // dojox.fx.toggleClass(options.uuid,"hidden").play();
-                
+
                 dojo.destroy(options.uuid);
                 secondDlg.hide();
                 secondDlg.destroy();
             }
         });
-        
+
         var cancel = new dijit.form.Button({
             label: options.content,
             onClick: function() {

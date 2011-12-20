@@ -1,14 +1,14 @@
 module namespace form = "http://basex.org/web/lib/form";
-import module namespace functx="http://www.functx.com"; 
-import module namespace web="http://basex.org/lib/web"; 
+import module namespace functx="http://www.functx.com";
+import module namespace web="http://basex.org/lib/web";
 
 (:-
     Renders an input element.
 -:)
 declare function form:input($name as xs:string,
         $label as xs:string,
-        $value as xs:string, 
-        $options 
+        $value as xs:string,
+        $options
     ) as element(div){
         let $defaults := map { "type" :="text", "name" := $name }
         let $options := map:new( ($defaults,$options) )
@@ -20,7 +20,7 @@ declare function form:input($name as xs:string,
             	for $m in map:keys($options)
             	return
             	attribute {$m}{$options($m)}
-                
+
             }
         }
 
@@ -30,7 +30,7 @@ declare function form:input($name as xs:string,
 declare function form:textarea($name as xs:string,
         $label as xs:string,
         $value as xs:string,
-        $options 
+        $options
     ) as element(div){
             let $defaults := map { "type" :="text", "name" := $name }
             let $options := map:new( ($defaults,$options) )
@@ -70,14 +70,14 @@ declare function form:form($d, $model, $action, $method) {
     </form>
 };
 declare function form:input($elem){
-    
+
     let $nam := string($elem/@name)
     let $pat := fn:concat(functx:path-to-node($elem/@name),"[@name='",$nam,"']")
     let $options := form:inspect($elem)
     return form:input($pat,$nam,$nam, $options)
 };
 declare function form:textarea($elem){
-    
+
     let $nam := string($elem/@name)
     let $pat := fn:concat(functx:path-to-node($elem/@name),"[@name='",$nam,"']")
     let $options := form:inspect($elem)
@@ -86,11 +86,11 @@ declare function form:textarea($elem){
 declare function form:inspect($elem){
     let $def := if($elem/*:text) then map {'dojoType':='dijit.form.Textarea','style':='width:400px'} else map {"dojoType":="dijit.form.TextBox"}
     return
-        if($elem/*:data) then 
+        if($elem/*:data) then
             switch($elem/*:data/@*:type)
                 case "date" return
                     map {"dojoType":="dijit.form.DateTextBox"}
-                case "string" return 
+                case "string" return
                     if(map:size(form:hasPattern($elem/*:data))>0) then
                         map:new( (form:hasPattern($elem/*:data), map:entry("dojoType","dijit.form.ValidationTextBox")))
                     else $def
@@ -106,32 +106,32 @@ declare function form:hasPattern($type){
                else map:entry($n, $param/text())
       )
   	return $map
-        
+
 };
 declare function form:start($d) {
 for $elem in $d/*
         let $uuid := web:uuid()
- return 
+ return
  switch( name($elem))
-  case "element" 
+  case "element"
   	return <div class="element">
   	    {
   	        switch($elem)
-  	            case $elem/*:text return form:textarea($elem) 
+  	            case $elem/*:text return form:textarea($elem)
   	            case $elem/*:data return form:input($elem)
   	            default return ""}
   	        {form:start($elem)}</div>
-  case "attribute" 
+  case "attribute"
   	return <div class="attr">
   	{
   	   form:input($elem)
   	}</div>
-  case "ref" 
+  case "ref"
   	return form:start(form:get-ref(root($elem), string($elem/@name)))
-  case "oneOrMore" 
+  case "oneOrMore"
   	return <div class="one-or-more" id="{$uuid}">{form:start($elem)}
   	                                      {form:add-one-or-more($elem, $uuid)}</div>
-  case "optional" 
+  case "optional"
   	return <div class="optional inner" title="{string($elem/@name)}">{form:add-optional($elem, $uuid)}<div id="t-{$uuid}" class="hidden inner">{form:start($elem)}</div></div>
   default return ""
   };
@@ -146,7 +146,7 @@ for $elem in $d/*
   };
 
 declare function form:add-one-or-more ($elem, $uuid) {
-    
+
         <button dojoType="dijit.form.Button" type="button"> + {string($elem/*:element/@*:name)}
         <div  id="{$uuid}-tmpl" class="hidden">
         <div>
@@ -156,7 +156,7 @@ declare function form:add-one-or-more ($elem, $uuid) {
     <script type="dojo/method" event="onClick" args="evt">
         bxForm.oneOrMore('{$uuid}','{string($elem/*:element/@*:name)}');
     </script>
-    
+
     </button>
 };
 
@@ -164,9 +164,9 @@ declare function form:add-one-or-more ($elem, $uuid) {
 declare function form:get-ref($root, $name as xs:string){
  $root//*:define[@name = $name]
 };
-(: 
+(:
 import module namespace form="http://basex.org/web/lib/form" at "/Users/michael/Code/basex-web/src/main/webapp/lib/form.xqm";
-import module namespace functx="http://www.functx.com"; 
+import module namespace functx="http://www.functx.com";
 
 form:start(doc('blog-schem')//*:element[@name = "entry"])
 :)
