@@ -15,14 +15,14 @@ return
         </p>
         <div class="comments">
         {
-            if(count($comments)) then 
+            if(count($comments)) then
                 for $comment in $comments//comment
-                return 
+                return
                 <div class="comment">
                     <div class="meta">
                     <h5>{$comment/from/text()}</h5> writes on {string($comment/@date)}</div>
                     <p>{$comment/body}</p>
-                    
+
                 </div>
             else "No comments yet, be the first to write one!"
         }{

@@ -28,18 +28,18 @@ public final class BaseXContext {
       return ResultPage.getEmpty();
     }
   };
-  
-  
-  
+
+
+
   /** Context. */
 //  private static final Context ctx = new Context();
   /** Session. */
 //  final static LocalSession session = new LocalSession(new Context());
-    final static Session session = SessionFactory.get(); 
+    final static Session session = SessionFactory.get();
 
   /** Do not construct me. */
   private BaseXContext() { /* void */}
-  
+
   /**
    * This Method reads and returns the result of a whole query.
    * @param f the filename
@@ -57,7 +57,7 @@ public final class BaseXContext {
     return exec(TextInput.content(new IOFile(f)).toString(), get, post, re, rq);
   }
 
-  /** 
+  /**
    * Executes a query string.
    * @param qu query string
    * @param get GET map
@@ -70,15 +70,15 @@ public final class BaseXContext {
   public static synchronized ResultPage exec(final String qu, final String get,
       final String post, final HttpServletResponse rp,
       final HttpServletRequest rq) throws IOException {
-    
+
     setReqResp(rp, rq);
     try {
       final Query q = session.query(qu);
-      
+
       bind(get, post, rq.getSession(true).getId(), q);
-      
+
       resultPage.get().setBody(q.execute());
-      assert null != resultPage.get().getBody() : "Query Result must not be ''"; 
+      assert null != resultPage.get().getBody() : "Query Result must not be ''";
       return resultPage.get();
     } catch(BaseXException e) {
         return err(rp, rq, e);
