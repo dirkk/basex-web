@@ -1,12 +1,12 @@
 import module namespace web="http://basex.org/lib/web";
 
 
- if($POST('name') and $POST('your_comment')) 
+ if($POST('name') and $POST('your_comment'))
     then
-        let $red := web:redirect(fn:concat("/app/blog/view/?entry=",$POST('uuid')), fn:concat($POST('name'), " ", "Your Comment has been saved")) 
+        let $red := web:redirect(fn:concat("/app/blog/view/?entry=",$POST('uuid')), fn:concat($POST('name'), " ", "Your Comment has been saved"))
                 return (
-                    $red, 
+                    $red,
                     blog:comment($POST('name'), $POST('your_comment'), $POST('uuid'))
                     )
-    else 
+    else
         blog:err()

@@ -66,7 +66,7 @@ public abstract class PrepareParamsServlet extends HttpServlet {
   private String getMap(final HttpServletRequest req) {
     @SuppressWarnings("unchecked")
     Set<Map.Entry<String, String[]>>set = req.getParameterMap().entrySet();
-    
+
     final HashMap<String, Object> result = new HashMap<String, Object>();
     for(final Map.Entry<String,String[]> entry : set) {
       final String key = entry.getKey();

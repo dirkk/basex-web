@@ -134,7 +134,7 @@ public class Xails extends PrepareParamsServlet {
    * @param file layout to fill
    * @throws IOException ex
    */
-  private void fillPageBuffer(final StringBuilder pb, 
+  private void fillPageBuffer(final StringBuilder pb,
       final String file) throws IOException {
     pb.append(
         TextInput.content(new IOFile(fPath +
