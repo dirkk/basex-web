@@ -21,7 +21,7 @@ declare function blog:comment-box($uuid){
 };
 declare updating function blog:comment($name, $message, $uuid){
     insert node
-        <comment date="{fn:current-date()}" uuid="{web:uuid()}">
+        <comment date="{fn:current-date()}" uuid="{util:uuid()}">
             <from>{$name}</from>
             <body>{$message}</body>
         </comment>

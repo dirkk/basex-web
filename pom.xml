@@ -3,10 +3,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.basex</groupId>
 	<artifactId>basex-web</artifactId>
-	<version>0.7.02-SNAPSHOT</version>
+	<version>0.7.1-SNAPSHOT</version>
 	<name>BaseX Web Application Server</name>
 	<properties>
-		<jettyVersion>7.4.5.v20110725</jettyVersion>
+		<jettyVersion>7.5.4.v20111024</jettyVersion>
 		<classname>org.basex.web.api.ServletApi</classname>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -16,7 +16,7 @@
 		<dependency>
 			<groupId>org.basex</groupId>
 			<artifactId>basex</artifactId>
-			<version>7.0</version>
+			<version>7.1-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -129,6 +129,10 @@
 				<groupId>org.mortbay.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
 				<version>${jettyVersion}</version>
+				<configuration>
+					<stopPort>8081</stopPort>
+					<stopKey>stop</stopKey>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -142,13 +146,13 @@
 					</execution>
 				</executions>
 			</plugin>
-      <plugin>
-        <artifactId>maven-war-plugin</artifactId>
-        <version>2.1.1</version>
-        <configuration>
-          <archiveClasses>true</archiveClasses>
-        </configuration>
-      </plugin>
+			<plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.1.1</version>
+				<configuration>
+					<archiveClasses>true</archiveClasses>
+				</configuration>
+			</plugin>
 
 		</plugins>
 		<extensions>

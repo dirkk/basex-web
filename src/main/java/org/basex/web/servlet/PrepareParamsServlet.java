@@ -63,22 +63,22 @@ public abstract class PrepareParamsServlet extends HttpServlet {
    * @param req request
    * @return GET map
    */
-  private String getMap(final HttpServletRequest req) {
-    @SuppressWarnings("unchecked")
-    Set<Map.Entry<String, String[]>>set = req.getParameterMap().entrySet();
+    private String getMap(final HttpServletRequest req) {
+        @SuppressWarnings("unchecked")
+        Set<Map.Entry<String, String[]>> set = req.getParameterMap().entrySet();
 
-    final HashMap<String, Object> result = new HashMap<String, Object>();
-    for(final Map.Entry<String,String[]> entry : set) {
-      final String key = entry.getKey();
-      final String[] value = entry.getValue();
-      if(value.length == 1){
-        result.put(key, value[0]);
-      }else{
-        result.put(key, value);
-      }
+        final HashMap<String, Object> result = new HashMap<String, Object>();
+        for (final Map.Entry<String, String[]> entry : set) {
+            final String key = entry.getKey();
+            final String[] value = entry.getValue();
+            if (value.length == 1) {
+                result.put(key, value[0]);
+            } else {
+                result.put(key, value);
+            }
+        }
+        return new Gson().toJson(result);
     }
-    return new Gson().toJson(result);
-  }
 
   @Override
   public final void doPost(final HttpServletRequest req,
