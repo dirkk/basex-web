@@ -37,20 +37,34 @@ public class Xails extends PrepareParamsServlet {
 
         init(req);
 
-        final String file = req.getHeader("X-Requested-With") != null
-                ? "/layouts/ajax.html" : "/layouts/default.html";
-        fillPageBuffer(pageBuffer, file);
 
         final String queryResult = buildResult(response, req, get, post);
         assert null != queryResult;
-        // response.setContentType("application/xml");
-        response.setContentType("text/html");
-        response.setCharacterEncoding("UTF-8");
         if (!response.containsHeader("Location")) {
             response.setStatus(HttpServletResponse.SC_OK);
         }
+        final String ct =  Objects.firstNonNull(response.getContentType(), "");
+        final String file = renderSimpleTemplate(req, ct)
+                ? "/layouts/ajax.html" : "/layouts/default.html";
+            fillPageBuffer(pageBuffer, file);
+
         response.getWriter().write(
                 pageBuffer.toString().replace("{{$content}}", queryResult));
+    }
+
+    /**
+     * Decides whether or not to render a simple template.
+     * @param req request
+     * @param ct Content Type
+     * @return true if the response is AJAX / JSON / TEXT
+     */
+    private boolean renderSimpleTemplate(final HttpServletRequest req,
+            final String ct) {
+        return req.getHeader("X-Requested-With") != null ||
+                ct.startsWith("application/json")||
+                ct.startsWith("text/plain") ||
+                ct.startsWith("application/oc") ||
+                ct.startsWith("application/xm");
     }
 
     /**

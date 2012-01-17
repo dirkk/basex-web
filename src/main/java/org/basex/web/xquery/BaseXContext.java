@@ -1,13 +1,22 @@
 package org.basex.web.xquery;
 
+import static org.basex.data.DataText.*;
+import static org.basex.io.MimeTypes.*;
+
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.basex.core.BaseXException;
+import org.basex.core.Prop;
+import org.basex.core.cmd.Set;
+import org.basex.io.serial.SerializerProp;
+import org.basex.server.LocalSession;
 import org.basex.server.Query;
-import org.basex.server.Session;
+import org.basex.util.Token;
+import org.basex.util.TokenBuilder;
+import org.basex.util.Util;
 import org.basex.web.servlet.util.ResultPage;
 import org.basex.web.session.SessionFactory;
 
@@ -26,13 +35,29 @@ public final class BaseXContext {
             return ResultPage.getEmpty();
         }
     };
+    /** A per Thread Session. */
+    private static final ThreadLocal<LocalSession> SESS =
+    new ThreadLocal<LocalSession>() {
+        @Override
+        protected LocalSession initialValue() {
+            final LocalSession ls = new LocalSession(SessionFactory.get());
+            final TokenBuilder tb = new TokenBuilder();
+            tb.addExt(SerializerProp.S_METHOD[0]).add("=").add(M_XHTML);
+            try {
+                ls.execute(new Set(Prop.SERIALIZER,tb ));
+            } catch (IOException e) {
+                Util.notexpected(e);
+            }
+            return ls;
+        }
+    };
 
-    /** Session. */
-    static final Session SESS = SessionFactory.get();
 
     /** Do not construct me. */
     private BaseXContext() { /* void */
     }
+
+
 
     /**
      * Executes a query string.
@@ -51,11 +76,11 @@ public final class BaseXContext {
 
         setReqResp(rp, rq);
         try {
-            final Query q = SESS.query(qu);
-
+            final Query q = SESS.get().query(qu);
             bind(get, post, rq.getSession(true).getId(), q);
 
             RESULT_PAGE.get().setBody(q.execute());
+            initResponse(new SerializerProp(q.options()));
             assert null != RESULT_PAGE.get().getBody() :
                 "Query Result must not be ''";
             return RESULT_PAGE.get();
@@ -104,6 +129,45 @@ public final class BaseXContext {
             final HttpServletRequest rq, final Exception e) {
         return new ResultPage("<div class=\"error\">" + e.getMessage()
                 + "</div>", rp, rq);
+    }
+
+
+    /**
+     * Sets the default output method and encoding.
+     * N.B. contrary do the default behaviour basex-web uses M_XHTML if nothing
+     *      else is specified.
+     * N.B.2. the XHTML mime type is set according to rfc3236
+     * @param sprop Serializer Properties
+     */
+    static void  initResponse(final SerializerProp sprop) {
+      // set encoding
+      RESULT_PAGE.get().getResp().
+          setCharacterEncoding(sprop.get(SerializerProp.S_ENCODING));
+
+      // set content type
+      String type = sprop.get(SerializerProp.S_MEDIA_TYPE);
+      if(type.isEmpty()) {
+        // determine content type dependent on output method
+        final String method = sprop.get(SerializerProp.S_METHOD);
+        if(method.equals(M_RAW)) {
+          type = APP_OCTET;
+        }
+        else if(method.equals(M_TEXT)){
+            type = "text/plain";
+        }
+        else if(method.equals(M_XML)) {
+            type= APP_XML;
+        } else if(Token.eq(method, M_JSON, M_JSONML)) {
+          type = APP_JSON;
+        } else if(Token.eq(method, M_HTML)) {
+          type = TEXT_HTML;
+        } else if(Token.eq(method, M_XHTML)) {
+          type= "application/xhtml+xml";
+        }
+      }else{
+          type = "application/xhtml+xml";
+      }
+      RESULT_PAGE.get().getResp().setContentType(type);
     }
 
     /**
