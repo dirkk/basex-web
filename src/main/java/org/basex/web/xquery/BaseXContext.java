@@ -27,6 +27,12 @@ import org.basex.web.session.SessionFactory;
  * @author Michael Seiferle <ms@basex.org>
  */
 public final class BaseXContext {
+    /**
+     * Default Output Method, set via Maven
+     */
+    final static String defaultOutputMethod = System.getProperty("org.basex.web.default.outputmethod") == null ?
+           "xhtml" : System.getProperty("org.basex.web.default.outputmethod");
+
     /** Thread local resultpage. */
     private static final ThreadLocal<ResultPage> RESULT_PAGE =
     new ThreadLocal<ResultPage>() {
@@ -42,7 +48,8 @@ public final class BaseXContext {
         protected LocalSession initialValue() {
             final LocalSession ls = new LocalSession(SessionFactory.get());
             final TokenBuilder tb = new TokenBuilder();
-            tb.addExt(SerializerProp.S_METHOD[0]).add("=").add(M_XHTML);
+            tb.addExt(SerializerProp.S_METHOD[0]).add("=")
+                .add(defaultOutputMethod);
             try {
                 ls.execute(new Set(Prop.SERIALIZER,tb ));
             } catch (IOException e) {
