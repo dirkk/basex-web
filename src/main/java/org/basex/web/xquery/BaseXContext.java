@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.basex.core.BaseXException;
 import org.basex.core.Prop;
 import org.basex.core.cmd.Set;
+import org.basex.io.out.ArrayOutput;
 import org.basex.io.serial.SerializerProp;
 import org.basex.server.LocalSession;
 import org.basex.server.Query;
@@ -74,20 +75,23 @@ public final class BaseXContext {
      * @param post POST map
      * @param rp response object
      * @param rq request object
+     * @param buff the result buffer
      * @return the query result.
      * @throws IOException on error
      */
     public static synchronized ResultPage exec(final String qu,
             final String get, final String post, final HttpServletResponse rp,
-            final HttpServletRequest rq) throws IOException {
+            final HttpServletRequest rq, final ArrayOutput buff) throws IOException {
 
         setReqResp(rp, rq);
         try {
+            SESS.get().setOutputStream(buff);
             final Query q = SESS.get().query(qu);
             bind(get, post, rq.getSession(true).getId(), q);
 
-            RESULT_PAGE.get().setBody(q.execute());
-            initResponse(new SerializerProp(q.options()));
+            q.execute();
+            initResponse(new SerializerProp(q.options()), rp);
+
             assert null != RESULT_PAGE.get().getBody() :
                 "Query Result must not be ''";
             return RESULT_PAGE.get();
@@ -134,6 +138,7 @@ public final class BaseXContext {
      */
     private static ResultPage err(final HttpServletResponse rp,
             final HttpServletRequest rq, final Exception e) {
+        System.err.println(e.getMessage());
         return new ResultPage("<div class=\"error\">" + e.getMessage()
                 + "</div>", rp, rq);
     }
@@ -145,11 +150,12 @@ public final class BaseXContext {
      *      else is specified.
      * N.B.2. the XHTML mime type is set according to rfc3236
      * @param sprop Serializer Properties
+     * @param rp the response object
      */
-    static void  initResponse(final SerializerProp sprop) {
-      // set encoding
-      RESULT_PAGE.get().getResp().
-          setCharacterEncoding(sprop.get(SerializerProp.S_ENCODING));
+    static void  initResponse(final SerializerProp sprop,
+            final HttpServletResponse rp) {
+      // set encoding *TODO* set only when not raw
+      rp.setCharacterEncoding(sprop.get(SerializerProp.S_ENCODING));
 
       // set content type
       String type = sprop.get(SerializerProp.S_MEDIA_TYPE);
@@ -171,10 +177,8 @@ public final class BaseXContext {
         } else if(Token.eq(method, M_XHTML)) {
           type= "application/xhtml+xml";
         }
-      }else{
-          type = "application/xhtml+xml";
       }
-      RESULT_PAGE.get().getResp().setContentType(type);
+      rp.setContentType(type);
     }
 
     /**

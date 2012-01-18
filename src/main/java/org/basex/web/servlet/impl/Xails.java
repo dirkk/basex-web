@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.basex.io.IO;
 import org.basex.io.in.TextInput;
+import org.basex.io.out.ArrayOutput;
 import org.basex.util.Token;
 import org.basex.web.servlet.PrepareParamsServlet;
 import org.basex.web.servlet.util.ResultPage;
@@ -33,23 +34,34 @@ public class Xails extends PrepareParamsServlet {
             final HttpServletRequest req, final File f, final String get,
             final String post) throws IOException {
         // TODO Auto-generated method stub
-        final StringBuilder pageBuffer = new StringBuilder(256);
 
-        init(req);
+        initMVC(req);
 
-
-        final String queryResult = buildResult(response, req, get, post);
-        assert null != queryResult;
+        final ArrayOutput buff = new ArrayOutput();
+        buildResult(response, req, get, post, buff);
+        assert buff.size() > 0;
         if (!response.containsHeader("Location")) {
             response.setStatus(HttpServletResponse.SC_OK);
         }
         final String ct =  Objects.firstNonNull(response.getContentType(), "");
-        final String file = renderSimpleTemplate(req, ct)
-                ? "/layouts/ajax.html" : "/layouts/default.html";
-            fillPageBuffer(pageBuffer, file);
+        if(!renderSimpleTemplate(req, ct)){
+//         response.getOutputStream().write(buff.toArray());
+         final TextInput ti = new TextInput(IO.get(fPath +"/layouts/default.html"));
+         response.getWriter().write(Token.string(ti.content()).replace("{{$content}}", buff.toString()));
+         // fillPageBuffer("/layouts/default.html").toString().replace("{{$content}}",
 
-        response.getWriter().write(
-                pageBuffer.toString().replace("{{$content}}", queryResult));
+        }else{
+            response.getOutputStream().write(buff.toArray());
+        }
+
+
+//                ? "/layouts/ajax.html" : "/layouts/default.html";
+//            fillPageBuffer(pageBuffer, file);
+//            response.getOutputStream().write(Token.token("Hello"));
+//        response.getWriter().write(
+//                pageBuffer.toString().replace("{{$content}}", queryResult));
+//            response.getOutputStream().flush();
+            response.flushBuffer();
     }
 
     /**
@@ -63,6 +75,7 @@ public class Xails extends PrepareParamsServlet {
         return req.getHeader("X-Requested-With") != null ||
                 ct.startsWith("application/json")||
                 ct.startsWith("text/plain") ||
+                ct.startsWith("image/") ||
                 ct.startsWith("application/oc") ||
                 ct.startsWith("application/xm");
     }
@@ -74,18 +87,22 @@ public class Xails extends PrepareParamsServlet {
      * @param req request reference
      * @param get get variables Map
      * @param post post variables Map
+     * @param buff
+     * @param out the output stream
      * @return the evaluated result
      * @throws IOException on error.
      */
     private String buildResult(final HttpServletResponse resp,
-            final HttpServletRequest req, final String get, final String post)
+            final HttpServletRequest req, final String get, final String post,
+            final ArrayOutput buff)
             throws IOException {
         final StringBuilder qry = prepareQuery();
         final TextInput tio = new TextInput(IO.get(view.getCanonicalPath()));
         qry.append(Token.string(tio.content()));
+
         final ResultPage queryResult = BaseXContext.exec(qry.toString(), get,
-                post, resp, req);
-        return queryResult.getBody();
+                post, resp, req, buff);
+        return "";
     }
 
     /**
@@ -124,7 +141,7 @@ public class Xails extends PrepareParamsServlet {
      * @param req request.
      * @throws HttpException on error
      */
-    private void init(final HttpServletRequest req) throws HttpException {
+    private void initMVC(final HttpServletRequest req) throws HttpException {
         final String cntr = Objects.firstNonNull(
                 req.getAttribute("xails.controller"), "page").toString();
         assert null != cntr : "Error no controller set";
@@ -145,14 +162,15 @@ public class Xails extends PrepareParamsServlet {
     /**
      * Reads the layout into the page Buffer.
      *
-     * @param pb StrinBuilder object containing the page's content.
      * @param fname layout to fill
+     * @return StringBuilder containing the Layout
      * @throws IOException ex
      */
-    private void fillPageBuffer(final StringBuilder pb, final String fname)
+    private StringBuilder fillPageBuffer( final String fname)
             throws IOException {
-
+        final StringBuilder pb = new StringBuilder();
         final TextInput ti = new TextInput(IO.get(fPath + fname));
         pb.append(Token.string(ti.content()));
+        return pb;
     }
 }
