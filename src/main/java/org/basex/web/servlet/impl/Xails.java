@@ -45,11 +45,8 @@ public class Xails extends PrepareParamsServlet {
                 resp);
 
         final String ct = Objects.firstNonNull(resp.getContentType(), "");
-<<<<<<< HEAD
-        if (renderSimpleTemplate(req, ct)) {
-=======
+
         if (!renderSimpleTemplate(req, ct)) {
->>>>>>> [MOD] Binary Output Handling
             final TextInput ti = new TextInput(IO.get(fPath
                     + "/layouts/default.html"));
             writeBefore(resp.getOutputStream(), ti);
