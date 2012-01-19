@@ -36,15 +36,6 @@
      <from>^/app/(\w+)\/?$</from>
      <set name="xails.controller">$1</set>
     <set name="xails.action">index</set>
-     
-     <to last="true">/index.xq?controller=$1&amp;action=index</to>
+          <to last="true">/index.xq?controller=$1&amp;action=index</to>
   </rule>
-  <rule>
-    <note>Controller with Action and parameter</note>
-    <from>^/app/(\w+)/\?(.*)$</from>
-    <set name="xails.controller">$1</set>
-    <set name="xails.action">view</set>
-    <to last="true">/index.xq?controller=$1&amp;action=view</to>
-  </rule>
-
 </urlrewrite>

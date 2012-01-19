@@ -1,17 +1,20 @@
 package org.basex.web.servlet.impl;
 
+import static org.basex.data.DataText.*;
+import static org.basex.io.MimeTypes.*;
+
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.basex.io.IO;
 import org.basex.io.in.TextInput;
-import org.basex.io.out.ArrayOutput;
+import org.basex.io.serial.SerializerProp;
 import org.basex.util.Token;
 import org.basex.web.servlet.PrepareParamsServlet;
-import org.basex.web.servlet.util.ResultPage;
 import org.basex.web.xquery.BaseXContext;
 import org.eclipse.jetty.http.HttpException;
 
@@ -24,85 +27,109 @@ import com.google.common.base.Objects;
  */
 public class Xails extends PrepareParamsServlet {
 
+    /** The content marker. */
+    private static final byte[] CONTENT_MARK = Token.token("{{$content}}");
     /** XQuery controllers/action.xq in charge. */
     private File view;
     /** XQuery controllers/action.xq in charge. */
     private File controller;
 
     @Override
-    public void get(final HttpServletResponse response,
+    public synchronized void get(final HttpServletResponse resp,
             final HttpServletRequest req, final File f, final String get,
             final String post) throws IOException {
-        // TODO Auto-generated method stub
-
         initMVC(req);
 
-        final ArrayOutput buff = new ArrayOutput();
-        buildResult(response, req, get, post, buff);
-        assert buff.size() > 0;
-        if (!response.containsHeader("Location")) {
-            response.setStatus(HttpServletResponse.SC_OK);
+        initQuery(req, resp, get, post);
+        initResponse(new SerializerProp(BaseXContext.getQuery().options()),
+                resp);
+
+        final String ct = Objects.firstNonNull(resp.getContentType(), "");
+        if (renderSimpleTemplate(req, ct)) {
+            final TextInput ti = new TextInput(IO.get(fPath
+                    + "/layouts/default.html"));
+            writeBefore(resp.getOutputStream(), ti);
+            BaseXContext.exec();
+            writeAfter(resp.getOutputStream(), ti);
+            ti.close();
+        } else {
+            BaseXContext.exec();
         }
-        final String ct =  Objects.firstNonNull(response.getContentType(), "");
-        if(!renderSimpleTemplate(req, ct)){
-//         response.getOutputStream().write(buff.toArray());
-         final TextInput ti = new TextInput(IO.get(fPath +"/layouts/default.html"));
-         response.getWriter().write(Token.string(ti.content()).replace("{{$content}}", buff.toString()));
-         // fillPageBuffer("/layouts/default.html").toString().replace("{{$content}}",
-
-        }else{
-            response.getOutputStream().write(buff.toArray());
+        if (!resp.containsHeader("Location")) {
+            resp.setStatus(HttpServletResponse.SC_OK);
         }
+        resp.flushBuffer();
+    }
 
+    /**
+     * Writes the layout to the stream
+     *
+     * @param s Target stream
+     * @param ti Buffered TextInput
+     * @throws IOException on error
+     */
+    private void writeBefore(final OutputStream s, final TextInput ti)
+            throws IOException {
+        int curChar;
+        int pos = -1;
+        byte[] search = Xails.CONTENT_MARK;
+        while ((curChar = ti.read()) > 0) {
+            if (curChar != search[++pos]) {
+                pos = -1;
+                s.write(curChar);
+            }
+            if (pos + 1 == search.length) return;
+        }
+    }
 
-//                ? "/layouts/ajax.html" : "/layouts/default.html";
-//            fillPageBuffer(pageBuffer, file);
-//            response.getOutputStream().write(Token.token("Hello"));
-//        response.getWriter().write(
-//                pageBuffer.toString().replace("{{$content}}", queryResult));
-//            response.getOutputStream().flush();
-            response.flushBuffer();
+    /**
+     * Writes the remaining layout to the output stream
+     *
+     * @param s Target stream
+     * @param ti Buffered TextInput
+     * @throws IOException on error
+     */
+    private void writeAfter(final OutputStream s, final TextInput ti)
+            throws IOException {
+        int cur;
+        while ((cur = ti.read()) > 0) s.write(cur);
     }
 
     /**
      * Decides whether or not to render a simple template.
+     *
      * @param req request
      * @param ct Content Type
      * @return true if the response is AJAX / JSON / TEXT
      */
     private boolean renderSimpleTemplate(final HttpServletRequest req,
             final String ct) {
-        return req.getHeader("X-Requested-With") != null ||
-                ct.startsWith("application/json")||
-                ct.startsWith("text/plain") ||
-                ct.startsWith("image/") ||
-                ct.startsWith("application/oc") ||
-                ct.startsWith("application/xm");
+        return req.getHeader("X-Requested-With") != null
+                || ct.startsWith("application/json")
+                || ct.startsWith("text/plain")
+                || ct.startsWith("image/")
+                || ct.startsWith("application/oc")
+                || ct.startsWith("application/xm");
     }
 
     /**
-     * Builds the resulting XQuery file in memory and evaluates the reslt.
+     * Builds the resulting XQuery file in memory and returns the Query object.
      *
+     * @param req the request
      * @param resp the response
-     * @param req request reference
-     * @param get get variables Map
-     * @param post post variables Map
-     * @param buff
-     * @param out the output stream
-     * @return the evaluated result
+     * @param post parameters as string
+     * @param get parameters as string
      * @throws IOException on error.
      */
-    private String buildResult(final HttpServletResponse resp,
-            final HttpServletRequest req, final String get, final String post,
-            final ArrayOutput buff)
+    private void initQuery(final HttpServletRequest req,
+            final HttpServletResponse resp, String get, String post)
             throws IOException {
         final StringBuilder qry = prepareQuery();
+
         final TextInput tio = new TextInput(IO.get(view.getCanonicalPath()));
         qry.append(Token.string(tio.content()));
-
-        final ResultPage queryResult = BaseXContext.exec(qry.toString(), get,
-                post, resp, req, buff);
-        return "";
+        tio.close();
+        BaseXContext.prepare(qry.toString(), resp, req, get, post);
     }
 
     /**
@@ -115,11 +142,11 @@ public class Xails extends PrepareParamsServlet {
         final StringBuilder qry = new StringBuilder(128);
         if (controller == null)
             return qry;
-        final String controllername = dbname(controller.getName());
+        final String cname = dbname(controller.getName());
 
         qry.append(String.format("import module namespace "
                 + "%s=\"http://www.basex.org/myapp/%s\" " + "at \"%s\";\n",
-                controllername, controllername, controller.getCanonicalPath()));
+                cname, cname, controller.getCanonicalPath()));
         return qry;
     }
 
@@ -132,6 +159,40 @@ public class Xails extends PrepareParamsServlet {
     public final String dbname(final String n) {
         final int i = n.lastIndexOf(".");
         return (i != -1 ? n.substring(0, i) : n).replaceAll("[^\\w-]", "");
+    }
+
+    /**
+     * Sets the default output method and encoding. N.B. contrary do the default
+     * behaviour basex-web uses M_XHTML if nothing else is specified. N.B.2. the
+     * XHTML mime type is set according to rfc3236
+     *
+     * @param sprop Serializer Properties
+     * @param resp the response object
+     */
+    final void initResponse(final SerializerProp sprop,
+            final HttpServletResponse resp) {
+        resp.setCharacterEncoding(sprop.get(SerializerProp.S_ENCODING));
+
+        // set content type
+        String type = sprop.get(SerializerProp.S_MEDIA_TYPE);
+        if (type.isEmpty()) {
+            // determine content type dependent on output method
+            final String method = sprop.get(SerializerProp.S_METHOD);
+            if (method.equals(M_RAW)) {
+                type = APP_OCTET;
+            } else if (method.equals(M_TEXT)) {
+                type = "text/plain";
+            } else if (method.equals(M_XML)) {
+                type = APP_XML;
+            } else if (Token.eq(method, M_JSON, M_JSONML)) {
+                type = APP_JSON;
+            } else if (Token.eq(method, M_HTML)) {
+                type = TEXT_HTML;
+            } else if (Token.eq(method, M_XHTML)) {
+                type = "application/xhtml+xml";
+            }
+        }
+        resp.setContentType(type);
     }
 
     /**
@@ -155,22 +216,9 @@ public class Xails extends PrepareParamsServlet {
 
         try {
             controller = super.requestedFile(cpath);
-        } catch (final HttpException e) { ;}
+        } catch (final HttpException e) {
+            ;
+        }
         view = super.requestedFile(vpath);
-    }
-
-    /**
-     * Reads the layout into the page Buffer.
-     *
-     * @param fname layout to fill
-     * @return StringBuilder containing the Layout
-     * @throws IOException ex
-     */
-    private StringBuilder fillPageBuffer( final String fname)
-            throws IOException {
-        final StringBuilder pb = new StringBuilder();
-        final TextInput ti = new TextInput(IO.get(fPath + fname));
-        pb.append(Token.string(ti.content()));
-        return pb;
     }
 }
