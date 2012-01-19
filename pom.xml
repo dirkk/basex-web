@@ -132,6 +132,12 @@
 				<configuration>
 					<stopPort>8081</stopPort>
 					<stopKey>stop</stopKey>
+					<systemProperties>
+						<systemProperty>
+							<name>org.basex.web.default.outputmethod</name>
+							<value>xhtml</value>
+						</systemProperty>
+					</systemProperties>
 				</configuration>
 			</plugin>
 			<plugin>
