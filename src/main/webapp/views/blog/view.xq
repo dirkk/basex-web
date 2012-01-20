@@ -1,4 +1,6 @@
 import module namespace web="http://basex.org/lib/web";
+declare option output:template "dark.html";
+
 let $entry := blog:find($GET('entry'))
 let $comments := $entry/comments
 return

@@ -33,14 +33,16 @@ public class Xails extends PrepareParamsServlet {
     private File view;
     /** XQuery controllers/action.xq in charge. */
     private File controller;
+    /** The template file */
+    private String template;
 
     @Override
     public synchronized void get(final HttpServletResponse resp,
             final HttpServletRequest req, final File f, final String get,
             final String post) throws IOException {
         initMVC(req);
-
         initQuery(req, resp, get, post);
+
         initResponse(new SerializerProp(BaseXContext.getQuery().options()),
                 resp);
 
@@ -48,7 +50,7 @@ public class Xails extends PrepareParamsServlet {
 
         if (!renderSimpleTemplate(req, ct)) {
             final TextInput ti = new TextInput(IO.get(fPath
-                    + "/layouts/default.html"));
+                    + "/layouts/" + template));
             writeBefore(resp.getOutputStream(), ti);
             BaseXContext.exec();
             writeAfter(resp.getOutputStream(), ti);
@@ -173,7 +175,8 @@ public class Xails extends PrepareParamsServlet {
     final void initResponse(final SerializerProp sprop,
             final HttpServletResponse resp) {
         resp.setCharacterEncoding(sprop.get(SerializerProp.S_ENCODING));
-
+        if(!sprop.get(SerializerProp.S_TEMPLATE).isEmpty())
+            this.template = sprop.get(SerializerProp.S_TEMPLATE);
         // set content type
         String type = sprop.get(SerializerProp.S_MEDIA_TYPE);
         if (type.isEmpty()) {
@@ -192,8 +195,9 @@ public class Xails extends PrepareParamsServlet {
             } else if (Token.eq(method, M_XHTML)) {
                 type = "application/xhtml+xml";
             }
-        }
+        }else{
         resp.setContentType(type);
+        }
     }
 
     /**
@@ -204,6 +208,7 @@ public class Xails extends PrepareParamsServlet {
      * @throws HttpException on error
      */
     private void initMVC(final HttpServletRequest req) throws HttpException {
+        this.template = "default.html";
         final String cntr = Objects.firstNonNull(
                 req.getAttribute("xails.controller"), "page").toString();
         assert null != cntr : "Error no controller set";
