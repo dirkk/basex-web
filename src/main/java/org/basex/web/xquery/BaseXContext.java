@@ -13,13 +13,18 @@ import org.basex.web.servlet.util.ResultPage;
 
 /**
  * Provides static methods to access BaseX.
+ * This class is the entry glue for all
+ * BaseX related tasks.
+ * Its atomic unit of operation is a {@link #RESULT_PAGE} that
+ * encapsulates all objects necessary to fullfill a complete request.
+ * RESULT_PAGEs are thread safe, such that each thread has its own copy.
  *
  * @author BaseX Team 2005-11, BSD License
  * @author Michael Seiferle <ms@basex.org>
  */
 public final class BaseXContext {
 
-    /** Thread local resultpage. */
+    /** Thread local ResultPage. */
     private static final ThreadLocal<ResultPage> RESULT_PAGE =
             new ThreadLocal<ResultPage>() {
         @Override
@@ -64,8 +69,10 @@ public final class BaseXContext {
             throws IOException {
         setReqResp(rp, rq);
 
-        RESULT_PAGE.get().getSession().setOutputStream(rp.getOutputStream());
-        final Query qu = RESULT_PAGE.get().getSession().query(q);
+        // Set output Stream to that of jetty://
+        RESULT_PAGE.get().session().setOutputStream(rp.getOutputStream());
+        // Create and Set an Query Object
+        final Query qu = RESULT_PAGE.get().session().query(q);
         RESULT_PAGE.get().setQuery(qu);
         bind(get, post, getReq().getSession(true).getId());
     }
@@ -92,9 +99,9 @@ public final class BaseXContext {
      */
     private static void bind(final String get, final String post,
             final String sess) throws IOException {
-        RESULT_PAGE.get().getQuery().bind("SESSION", sess);
-        RESULT_PAGE.get().getQuery().bind("GET", get, "json");
-        RESULT_PAGE.get().getQuery().bind("POST", post, "json");
+        RESULT_PAGE.get().query().bind("SESSION", sess);
+        RESULT_PAGE.get().query().bind("GET", get, "json");
+        RESULT_PAGE.get().query().bind("POST", post, "json");
     }
 
     /**
@@ -102,7 +109,7 @@ public final class BaseXContext {
      * @return response
      */
     static HttpServletResponse getResp() {
-        return RESULT_PAGE.get().getResp();
+        return RESULT_PAGE.get().response();
     }
 
     /**
@@ -111,7 +118,7 @@ public final class BaseXContext {
      * @return Query Object
      */
     public static Query getQuery() {
-        return RESULT_PAGE.get().getQuery();
+        return RESULT_PAGE.get().query();
     }
 
     /**
@@ -120,7 +127,7 @@ public final class BaseXContext {
      * @return request
      */
     static HttpServletRequest getReq() {
-        return RESULT_PAGE.get().getReq();
+        return RESULT_PAGE.get().request();
     }
 
 }

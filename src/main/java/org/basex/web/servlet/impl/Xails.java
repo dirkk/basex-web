@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.basex.io.IO;
 import org.basex.io.in.TextInput;
 import org.basex.io.serial.SerializerProp;
+import org.basex.server.Query;
 import org.basex.util.Token;
 import org.basex.web.servlet.PrepareParamsServlet;
 import org.basex.web.xquery.BaseXContext;
@@ -36,25 +37,19 @@ public class Xails extends PrepareParamsServlet {
     /** The template file. */
     private String template;
 
+
     @Override
     public synchronized void get(final HttpServletResponse resp,
             final HttpServletRequest req, final File f, final String get,
             final String post) throws IOException {
         initMVC(req);
         initQuery(req, resp, get, post);
-
-        initResponse(new SerializerProp(BaseXContext.getQuery().options()),
-                resp);
+        initHeaders(BaseXContext.getQuery(), resp);
 
         final String ct = Objects.firstNonNull(resp.getContentType(), "");
 
         if (!renderSimpleTemplate(req, ct)) {
-            final TextInput ti = new TextInput(IO.get(fPath
-                    + "/layouts/" + template));
-            writeBefore(resp.getOutputStream(), ti);
-            BaseXContext.exec();
-            writeAfter(resp.getOutputStream(), ti);
-            ti.close();
+            fillTemplate(resp);
         } else {
             BaseXContext.exec();
         }
@@ -62,6 +57,21 @@ public class Xails extends PrepareParamsServlet {
             resp.setStatus(HttpServletResponse.SC_OK);
         }
         resp.flushBuffer();
+    }
+
+    /**
+     * Fills a specified template with the results from the Query.
+     * @param resp response.
+     * @throws IOException on error.
+     */
+    private void fillTemplate(final HttpServletResponse resp)
+            throws IOException {
+        final TextInput ti = new TextInput(IO.get(fPath
+                + "/layouts/" + template));
+        writeBefore(resp.getOutputStream(), ti);
+        BaseXContext.exec();
+        writeAfter(resp.getOutputStream(), ti);
+        ti.close();
     }
 
     /**
@@ -143,8 +153,8 @@ public class Xails extends PrepareParamsServlet {
      */
     private StringBuilder prepareQuery() throws IOException {
         final StringBuilder qry = new StringBuilder(128);
-        if (controller == null)
-            return qry;
+        if (controller == null) return qry;
+
         final String cname = dbname(controller.getName());
 
         qry.append(String.format("import module namespace "
@@ -169,12 +179,17 @@ public class Xails extends PrepareParamsServlet {
      * behaviour basex-web uses M_XHTML if nothing else is specified. N.B.2. the
      * XHTML mime type is set according to rfc3236
      *
-     * @param sprop Serializer Properties
+     * @param q the query object
      * @param resp the response object
+     * @throws IOException on error
      */
-    final void initResponse(final SerializerProp sprop,
-            final HttpServletResponse resp) {
+    final void initHeaders(final Query q,
+            final HttpServletResponse resp) throws IOException {
+        final SerializerProp sprop = new SerializerProp(q.options());
+
         resp.setCharacterEncoding(sprop.get(SerializerProp.S_ENCODING));
+
+        // determine template
         if(!sprop.get(SerializerProp.S_TEMPLATE).isEmpty())
             this.template = sprop.get(SerializerProp.S_TEMPLATE);
         // set content type
@@ -209,6 +224,7 @@ public class Xails extends PrepareParamsServlet {
      */
     private void initMVC(final HttpServletRequest req) throws HttpException {
         this.template = "default.html";
+        this.controller = null;
         final String cntr = Objects.firstNonNull(
                 req.getAttribute("xails.controller"), "page").toString();
         assert null != cntr : "Error no controller set";
@@ -223,7 +239,7 @@ public class Xails extends PrepareParamsServlet {
         try {
             controller = super.requestedFile(cpath);
         } catch (final HttpException e) {
-            ;
+            ; // don't import controller if it is not found.
         }
         view = super.requestedFile(vpath);
     }

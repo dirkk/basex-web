@@ -64,7 +64,7 @@ public final class ResultPage {
      *
      * @return the resp
      */
-    public HttpServletResponse getResp() {
+    public HttpServletResponse response() {
         return resp;
     }
 
@@ -82,7 +82,7 @@ public final class ResultPage {
      *
      * @return the req
      */
-    public HttpServletRequest getReq() {
+    public HttpServletRequest request() {
         return req;
     }
 
@@ -116,7 +116,7 @@ public final class ResultPage {
      * Returns a query object.
      * @return the query
      */
-    public Query getQuery() {
+    public Query query() {
         return query;
     }
 
@@ -124,7 +124,7 @@ public final class ResultPage {
      * Returns the current LocalSession.
      * @return the session
      */
-    public LocalSession getSession() {
+    public LocalSession session() {
         return session;
     }
 

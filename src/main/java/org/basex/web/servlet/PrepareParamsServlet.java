@@ -54,7 +54,7 @@ public abstract class PrepareParamsServlet extends HttpServlet {
    * @param req request
    * @return POST map
    */
-  private String getPost(final HttpServletRequest req) {
+  private String postMap(final HttpServletRequest req) {
     return getMap(req);
   }
 
@@ -85,7 +85,7 @@ public abstract class PrepareParamsServlet extends HttpServlet {
       final HttpServletResponse resp) throws IOException {
 
     final String get = "{}";
-    final String post = getPost(req);
+    final String post = postMap(req);
 
     try {
       get(resp, req, requestedFile(req.getRequestURI()), get, post);
