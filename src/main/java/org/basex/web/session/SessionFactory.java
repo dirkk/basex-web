@@ -10,16 +10,14 @@ import org.basex.core.Context;
  *
  */
 public final class SessionFactory {
-  /**
- * The Context Instance
- */
+  /** The Context Instance.*/
     private static final Context INSTANCE = new Context();
 
     /**
      * Singleton instance.
      * @return the singleton context
      */
-    public static Context get(){
+    public static Context get() {
         return INSTANCE;
     }
     /** Private Constructor. */

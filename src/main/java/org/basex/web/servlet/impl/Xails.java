@@ -33,7 +33,7 @@ public class Xails extends PrepareParamsServlet {
     private File view;
     /** XQuery controllers/action.xq in charge. */
     private File controller;
-    /** The template file */
+    /** The template file. */
     private String template;
 
     @Override
@@ -65,7 +65,7 @@ public class Xails extends PrepareParamsServlet {
     }
 
     /**
-     * Writes the layout to the stream
+     * Writes the layout to the stream.
      *
      * @param s Target stream
      * @param ti Buffered TextInput
@@ -86,7 +86,7 @@ public class Xails extends PrepareParamsServlet {
     }
 
     /**
-     * Writes the remaining layout to the output stream
+     * Writes the remaining layout to the output stream.
      *
      * @param s Target stream
      * @param ti Buffered TextInput
@@ -125,7 +125,7 @@ public class Xails extends PrepareParamsServlet {
      * @throws IOException on error.
      */
     private void initQuery(final HttpServletRequest req,
-            final HttpServletResponse resp, String get, String post)
+            final HttpServletResponse resp, final String get, final String post)
             throws IOException {
         final StringBuilder qry = prepareQuery();
 
@@ -195,7 +195,7 @@ public class Xails extends PrepareParamsServlet {
             } else if (Token.eq(method, M_XHTML)) {
                 type = "application/xhtml+xml";
             }
-        }else{
+        } else {
         resp.setContentType(type);
         }
     }

@@ -22,21 +22,20 @@ import org.basex.web.session.SessionFactory;
  */
 public final class ResultPage {
     /**
-     * Default Output Method, set via Maven
+     * Default Output Method, set via Maven.
      */
-    final static String defaultOutputMethod = System
-            .getProperty("org.basex.web.default.outputmethod") == null
-            ? "xhtml" : System
-                    .getProperty("org.basex.web.default.outputmethod");
+    static final String DEFAULT_OUTPUT_M = System.getProperty(
+            "org.basex.web.default.outputmethod") == null
+           ? "xhtml" : System.getProperty("org.basex.web.default.outputmethod");
 
     /** Servlet Response. */
     private HttpServletResponse resp;
     /** Servlet Request. */
     private HttpServletRequest req;
 
-    /** QuerySession */
+    /** QuerySession. */
     private final LocalSession session = new LocalSession(SessionFactory.get());
-    /** Query **/
+    /** Query. **/
     private Query query;
 
     /**
@@ -52,10 +51,9 @@ public final class ResultPage {
         resp = rsp;
         req = rq;
         final TokenBuilder tb = new TokenBuilder();
-        tb.addExt(SerializerProp.S_METHOD[0]).add("=")
-            .add(defaultOutputMethod);
+        tb.addExt(SerializerProp.S_METHOD[0]).add("=").add(DEFAULT_OUTPUT_M);
         try {
-            session.execute(new Set(Prop.SERIALIZER,tb ));
+            session.execute(new Set(Prop.SERIALIZER, tb));
         } catch (IOException e) {
             Util.notexpected(e);
         }
@@ -107,6 +105,7 @@ public final class ResultPage {
     }
 
     /**
+     * Sets a query object.
      * @param qu Query
      */
     public void setQuery(final Query qu) {
@@ -114,6 +113,7 @@ public final class ResultPage {
     }
 
     /**
+     * Returns a query object.
      * @return the query
      */
     public Query getQuery() {
@@ -121,6 +121,7 @@ public final class ResultPage {
     }
 
     /**
+     * Returns the current LocalSession.
      * @return the session
      */
     public LocalSession getSession() {
