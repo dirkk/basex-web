@@ -187,8 +187,7 @@ public class Xails extends PrepareParamsServlet {
             final HttpServletResponse resp) throws IOException {
         final SerializerProp sprop = new SerializerProp(q.options());
 
-        resp.setCharacterEncoding(sprop.get(SerializerProp.S_ENCODING));
-
+        final String enc = sprop.get(SerializerProp.S_ENCODING);
         // determine template
         if(!sprop.get(SerializerProp.S_TEMPLATE).isEmpty())
             this.template = sprop.get(SerializerProp.S_TEMPLATE);
@@ -210,9 +209,12 @@ public class Xails extends PrepareParamsServlet {
             } else if (Token.eq(method, M_XHTML)) {
                 type = "application/xhtml+xml";
             }
+            resp.setContentType(type + ";charset=" + enc);
         } else {
-        resp.setContentType(type);
+            resp.setContentType(type);
         }
+
+
     }
 
     /**
