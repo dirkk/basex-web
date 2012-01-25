@@ -4,7 +4,9 @@ import static org.basex.data.DataText.*;
 import static org.basex.io.MimeTypes.*;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 import javax.servlet.http.HttpServletRequest;
@@ -66,12 +68,11 @@ public class Xails extends PrepareParamsServlet {
      */
     private void fillTemplate(final HttpServletResponse resp)
             throws IOException {
-        final TextInput ti = new TextInput(IO.get(fPath
-                + "/layouts/" + template));
-        writeBefore(resp.getOutputStream(), ti);
+        final InputStream is = new FileInputStream(fPath + "/layouts/" + template);
+        writeBefore(resp.getOutputStream(), is);
         BaseXContext.exec();
-        writeAfter(resp.getOutputStream(), ti);
-        ti.close();
+        writeAfter(resp.getOutputStream(), is);
+        is.close();
     }
 
     /**
@@ -81,7 +82,7 @@ public class Xails extends PrepareParamsServlet {
      * @param ti Buffered TextInput
      * @throws IOException on error
      */
-    private void writeBefore(final OutputStream s, final TextInput ti)
+    private void writeBefore(final OutputStream s, final InputStream ti)
             throws IOException {
         int curChar;
         int pos = -1;
@@ -102,7 +103,7 @@ public class Xails extends PrepareParamsServlet {
      * @param ti Buffered TextInput
      * @throws IOException on error
      */
-    private void writeAfter(final OutputStream s, final TextInput ti)
+    private void writeAfter(final OutputStream s, final InputStream ti)
             throws IOException {
         int cur;
         while ((cur = ti.read()) > 0) s.write(cur);
@@ -187,7 +188,7 @@ public class Xails extends PrepareParamsServlet {
             final HttpServletResponse resp) throws IOException {
         final SerializerProp sprop = new SerializerProp(q.options());
 
-        resp.setCharacterEncoding(sprop.get(SerializerProp.S_ENCODING));
+        final String enc = sprop.get(SerializerProp.S_ENCODING);
 
         // determine template
         if(!sprop.get(SerializerProp.S_TEMPLATE).isEmpty())
@@ -210,6 +211,8 @@ public class Xails extends PrepareParamsServlet {
             } else if (Token.eq(method, M_XHTML)) {
                 type = "application/xhtml+xml";
             }
+            resp.setContentType(type +";charset=" + enc);
+
         } else {
         resp.setContentType(type);
         }
