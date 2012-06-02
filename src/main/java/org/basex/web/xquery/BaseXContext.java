@@ -1,6 +1,7 @@
 package org.basex.web.xquery;
 
 import java.io.IOException;
+import java.io.PrintStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -9,6 +10,7 @@ import org.basex.core.BaseXException;
 import org.basex.query.QueryProcessor;
 import org.basex.server.Query;
 import org.basex.util.Util;
+import org.basex.web.servlet.util.Constants;
 import org.basex.web.servlet.util.ResultPage;
 
 /**
@@ -40,14 +42,32 @@ public final class BaseXContext {
     /**
      * Executes a query string after binding the request parameters.
      *
+     * @param errorHandling How a possible error message will be returned to
+     * the client
      * @throws IOException on error
      */
-    public static void exec() throws IOException {
+    public static void exec(final Constants.errorHandling errorHandling)
+            throws IOException {
 
         try {
             getQuery().execute();
         } catch (BaseXException e) {
-            Util.notexpected(e);
+            if (errorHandling == Constants.errorHandling.MESSAGE) {
+                String errStr = "<BaseXError>" + e.getLocalizedMessage() +
+                        "</BaseXError>";
+                RESULT_PAGE.get().response().getOutputStream().write(
+                        errStr.getBytes());
+            } else if (errorHandling == Constants.errorHandling.STACKTRACE) {
+                RESULT_PAGE.get().response().getOutputStream().write(
+                        "<BaseXError>".getBytes());
+                PrintStream ps = new PrintStream(RESULT_PAGE.get().response()
+                        .getOutputStream());
+                e.printStackTrace(ps);
+                RESULT_PAGE.get().response().getOutputStream().write(
+                        "</BaseXError>".getBytes());
+            } else {
+                Util.notexpected(e);
+            }
         }
     }
 

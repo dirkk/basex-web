@@ -18,6 +18,7 @@ import org.basex.io.serial.SerializerProp;
 import org.basex.server.Query;
 import org.basex.util.Token;
 import org.basex.web.servlet.PrepareParamsServlet;
+import org.basex.web.servlet.util.Constants;
 import org.basex.web.xquery.BaseXContext;
 import org.eclipse.jetty.http.HttpException;
 
@@ -38,6 +39,8 @@ public class Xails extends PrepareParamsServlet {
     private File controller;
     /** The template file. */
     private String template;
+    /** Error handling. */
+    private Constants.errorHandling errorHandling;
 
 
     @Override
@@ -47,13 +50,14 @@ public class Xails extends PrepareParamsServlet {
         initMVC(req);
         initQuery(req, resp, get, post);
         initHeaders(BaseXContext.getQuery(), resp);
+        initErrorHandling(req);
 
         final String ct = Objects.firstNonNull(resp.getContentType(), "");
 
         if (!renderSimpleTemplate(req, ct)) {
             fillTemplate(resp);
         } else {
-            BaseXContext.exec();
+            BaseXContext.exec(errorHandling);
         }
         if (!resp.containsHeader("Location")) {
             resp.setStatus(HttpServletResponse.SC_OK);
@@ -70,10 +74,14 @@ public class Xails extends PrepareParamsServlet {
             throws IOException {
         final InputStream is = new FileInputStream(fPath + "/layouts/" + template);
         writeBefore(resp.getOutputStream(), is);
-        BaseXContext.exec();
+        BaseXContext.exec(errorHandling);
         writeAfter(resp.getOutputStream(), is);
         is.close();
     }
+
+    /**
+     * Executes the query and prints the output. If the query failed
+     */
 
     /**
      * Writes the layout to the stream.
@@ -211,7 +219,7 @@ public class Xails extends PrepareParamsServlet {
             } else if (Token.eq(method, M_XHTML)) {
                 type = "application/xhtml+xml";
             }
-            resp.setContentType(type +";charset=" + enc);
+            resp.setContentType(type + ";charset=" + enc);
 
         } else {
         resp.setContentType(type);
@@ -245,5 +253,15 @@ public class Xails extends PrepareParamsServlet {
             ; // don't import controller if it is not found.
         }
         view = super.requestedFile(vpath);
+    }
+
+    private void initErrorHandling(final HttpServletRequest req) {
+        String err = req.getHeader("X-BaseX-Error");
+        if (err == null || err.equalsIgnoreCase("SEND_HTTP_ERROR"))
+            errorHandling = Constants.errorHandling.SEND_HTTP_ERROR;
+        else if (err.equalsIgnoreCase("MESSAGE"))
+            errorHandling = Constants.errorHandling.MESSAGE;
+        else if (err.equalsIgnoreCase("STACKTRACE"))
+            errorHandling = Constants.errorHandling.STACKTRACE;
     }
 }
