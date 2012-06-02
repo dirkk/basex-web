@@ -80,10 +80,6 @@ public class Xails extends PrepareParamsServlet {
     }
 
     /**
-     * Executes the query and prints the output. If the query failed
-     */
-
-    /**
      * Writes the layout to the stream.
      *
      * @param s Target stream
@@ -97,6 +93,8 @@ public class Xails extends PrepareParamsServlet {
         byte[] search = Xails.CONTENT_MARK;
         while ((curChar = ti.read()) > 0) {
             if (curChar != search[++pos]) {
+                for (int i = 0; i < pos; ++i)
+                    s.write(search[i]);
                 pos = -1;
                 s.write(curChar);
             }
