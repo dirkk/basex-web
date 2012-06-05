@@ -253,6 +253,13 @@ public class Xails extends PrepareParamsServlet {
         view = super.requestedFile(vpath);
     }
 
+    /**
+     * Processes the HTTP header for the X-BaseX-Error flag and
+     * depending on this flag enables the return of an error
+     * message or not.
+     *
+     * @param req HTTP request
+     */
     private void initErrorHandling(final HttpServletRequest req) {
         String err = req.getHeader("X-BaseX-Error");
         if (err == null || err.equalsIgnoreCase("SEND_HTTP_ERROR"))
